@@ -1,0 +1,3 @@
+function setPath
+
+addpath(genpath('.'))
