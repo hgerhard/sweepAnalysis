@@ -50,6 +50,11 @@ hdrFields = {
     'ThrInRange'    '%s\t'     2 %31
     'MaxSNR'        '%f\t'     2 };%32
 
+% If the naming convention of the channels in the data set is 'hc%d', the
+% returned channelNameDict will be empty. Otherwise, if the naming
+% convention of the channels is something other than 'hc%d',
+% channelNameDict will not be empty and will map string names to double
+% values
 channelNameDict = containers.Map;
 
 channelIx = 4;
