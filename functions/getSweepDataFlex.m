@@ -1,4 +1,4 @@
-function [colHdr, freqsAnalyzed, binLevels, dataMatrix] = getSweepDataFlex(datafile, chanToSave)
+function [colHdr, freqsAnalyzed, binLevels, dataMatrix, channelNameDict] = getSweepDataFlex(datafile, chanToSave)
 
 
 %% Imports Sweep Data from a Text File
@@ -50,6 +50,12 @@ hdrFields = {
     'ThrInRange'    '%s\t'     2 %31
     'MaxSNR'        '%f\t'     2 };%32
 
+% If the naming convention of the channels in the data set is 'hc%d', the
+% returned channelNameDict will be empty. Otherwise, if the naming
+% convention of the channels is something other than 'hc%d',
+% channelNameDict will not be empty and will map string names to double
+% values
+channelNameDict = containers.Map;
 
 channelIx = 4;
 harmIx = 9;
@@ -60,8 +66,22 @@ fid=fopen(datafile);
 tline=fgetl(fid); % skip the header line
 dati=textscan(fid, [hdrFields{:,2}], 'delimiter', '\t', 'EmptyValue', nan);
 % Convert the channel strings into digit only
+currIndex = 1;
 for i=1:size(dati{1,4})
-    chan{1,i}=sscanf(dati{1, 4}{i}, 'hc%d');
+    currChanName = dati{1,4}{i};
+    % Need to make new name for the weird channel naming
+    if ~strcmp(currChanName(1:2), 'hc')
+        if ~any(strcmp(keys(channelNameDict), currChanName))
+            channelNameDict(currChanName) = currIndex;
+            currIndex = currIndex + 1;
+            chan{1,i} = channelNameDict(currChanName);
+        else
+            chan{1,i} = channelNameDict(currChanName);
+        end
+    % Otherwise, just parse channel name
+    else
+        chan{1,i}=sscanf(dati{1, 4}{i}, 'hc%d'); 
+    end
 end
 
 dati{1,channelIx}=chan';
@@ -86,7 +106,6 @@ for s=1:length(colsToKeep)
             dataMatrix(:,s)=cell2mat((dati{1, col}(:)));
         end
     end
-    
 end
 
 numBins = max(dataMatrix(:,colsToKeep==11));
