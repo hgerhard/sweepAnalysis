@@ -1,0 +1,1 @@
+iSess	SessDate	Operator	LastName	FirstName	BirthDate	DueDate	DayAge	Sex	Handedness	DaqRateHz	NChan	Montage	Notes	SsnLabel	SsnLevel	DomEye	FK_Mtg	PK_Sess20150722_143544	7/22/15	Operator	S12_pilot2	New	nan	nan	nan	m	nan	420.00	128	HydroCel 128-Avg	nan	None	0.000	Unkn	0	0
