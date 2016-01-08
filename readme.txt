@@ -5,20 +5,30 @@ This directory contains code to read text exports of sweep SSVEP data (generated
 
 GETTING STARTED:
 ----------------
-The script example.m contains an outline of how to analyze a PowerDiva Pro export. The example data is provided in exampleData/.
+The script example.m contains an outline of how to analyze a PowerDiva text export. Various kinds of example data are provided in exampleData/.
 
 
 INFO ABOUT CONTENTS:
 --------------------
 
 subdirectories:
--functions (still in development)
--scriptsForDevelopment (temporary files to be deleted as functionality is developed)
--exampleData (a PowerDiva Pro export of a SSVEP experiment)
+
+- functions/
+
+- exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/ (a PowerDiva Pro export of an SSVEP experiment with 8 participants)
+
+- exampleData/PowerDivaHostSingleSubject_Exp_TEXT_HCN_128_Avg/ (a PowerDiva Host export of one participant’s data in an SSVEP experiment)
+
+- exampleData/tACS_withResponseExports/ (a PowerDiva Host export of one tACS subject’s data with both RLS & RTSeg_*.mat files which contain the responses on each trial — useful for testing appendSegToData.m)
+
+- RLibrary/ (#NATHAN please add description here)
+
 
 key functions:
+
 -getSweepDataFlex.m (reads text file exports & returns selected data)
 -makeDataStructure.m (loops over all conditions & selected channels, calling getSweepDataFlex.m and storing results in an array of structs)
+
 
 
 NOTES ON DEVELOPMENT:
@@ -27,8 +37,6 @@ This code is still very much in development. Several functions need to be cleane
 
 -Wherever you see the string ### in a comment, I have noted something that I’d like to find easily so I can change or update it later on.
 
--Eventually, I’d like to change to an object oriented approach instead of using structs.
-
 -We need to make bridge functions to the rcaDevelopment code so that the same plotting and parameter estimation routines can be applied to reliable components (rather than sensors).
 
 -We need to implement the ability to plot arbitrary combinations of datasets in single plots, e.g. to compare different groups of subjects or to compare results across frequencies, across experiments with different stimulus levels, etc.
@@ -36,4 +44,4 @@ This code is still very much in development. Several functions need to be cleane
 -We need to make the code flexible enough to handle all the different kinds of EEG datasets that PowerDiva can handle (e.g. low channel, TACS, starstim, 128 channel). This primarily affects getSweepDataFlex.m & any potential dependencies on how the output variables are formatted.
 
 
-file last updated 11/19/2015. Holly Gerhard, Stanford University.
+file last updated 1/7/2015. Holly Gerhard, Stanford University.
