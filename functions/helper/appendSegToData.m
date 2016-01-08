@@ -1,4 +1,11 @@
 function [colHdr, newData] = appendSegToData(colHdr, data, segFile)
+% [colHdr, newData] = appendSegToData(colHdr, data, segFile)
+%
+% This function adds the response data stored in the matlab variable
+% segFile (exported by PowerDiva) to the matrix of EEG data stored in data
+% (the dataMatrix field of pdData variables). The variable colHdr stores
+% the string labels for the columns of data (the hdrFields field of pdData).
+
     % Function assumes data has 'iCh', 'iCond', 'iTrial'
     
     load(segFile);
