@@ -21,20 +21,23 @@ for k = 1:length(dataHdr)
     end
 end
 
-nSubj = max(pdData(:,trialIx));
-
-if nargin < 5
+if nargin < 5 || isempty(colorVal)
     colorVal = [0.5 0.5 0.5];
 end
 
-if nargin < 6
+if nargin < 6 || isempty(figNum)
     figure;
     set(gcf,'Color','w');
     set(gca,'FontSize',10);
     subplot(2,5,1);
     hold on;
-    figNum = gcf;
-else
+    figInfo = gcf;
+    if ~isnumeric(figInfo)
+        figNum = figInfo.Number;
+    else
+        figNum = figInfo;
+    end
+else    
     figure(figNum);
 end
 
@@ -63,7 +66,7 @@ for binNum = 1:nBins
     
     errorEllipse = getErrorEllipse(xyData);
     
-    for k = 1:nSubj
+    for k = 1:length(xyData) % which is the number of subjects if this is project data, or the number of trials if individ. subject data
         plot([0 Sr(k)],[0 Si(k)],'k-','Color',colorVal,'LineWidth',1);
         %plot(Sr(k),Si(k),'ko','MarkerFaceColor',colorVal,'MarkerEdgeColor',colorVal,'MarkerSize',6);
     end

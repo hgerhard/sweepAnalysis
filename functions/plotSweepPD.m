@@ -1,15 +1,24 @@
-function [figNum,plottedVals] = plotSweepPD(pdData,bootData,dataHdr,binLevels,freqNum,dataColor,figHandles)
+function [figNum,plotNum] = plotSweepPD(plotType,pdData,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
 
-% PD = use precomputed values from PowerDiva
+% [figNum,plotNum] = plotSweepPD(plotType,pdData,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
+%   
+% Create a plot that looks like the PowerDiva style plots, using 
+% precomputed values from PowerDiva for the means and noise estimates. The
+% additional property of this plot is that it also shows errorbars based on
+% the desired type of error estimation process specified in errType
+% (default 'SEM') for the plotType 'Ampl'
+%
+% plotTypes: 'Ampl' (amplitude in muV) or 'SNR' for Snr (no errorbars)
+%
+% This function is only meant to be called once for a particular sweep. The
+% logic is that you create a figure and then call this function each time
+% you want to plot another sweep (i.e. from a different group or a
+% different condition)
 
 for k = 1:length(dataHdr)
     switch dataHdr{k}
-        case 'iCond'
-            condIx = k;
         case 'iTrial'
             trialIx = k;
-        case 'iCh'
-            chanIx = k;
         case 'iFr'
             freqIx = k;
         case 'iBin'
@@ -24,22 +33,33 @@ for k = 1:length(dataHdr)
             SNRIx = k;
         case 'Noise'
             noiseIx = k;
-        case 'StdErr'
-            errorIx = k;
     end
 end
 
-nSubj = max(pdData(:,trialIx));
+switch plotType
+    case {'Ampl','SNR'}
+    otherwise
+        error('PlotType (parameter 1) must be either ''Ampl'' or ''SNR''');
+end
+if nargin < 6 || isempty(errType)
+    errType = 'SEM';
+end
 
-if nargin < 6
+if nargin < 7 || isempty(dataColor)
     dataColor = 'k';
 end
 
-if nargin < 7
+hexagArrag = false;
+if nargin < 8 || isempty(figHandles)
     figure;
     set(gcf,'Color','w');
-    set(gca,'FontSize',18);
-    figNum = gcf;
+    set(gca,'FontSize',20);
+    figInfo = gcf;
+    if ~isnumeric(figInfo)
+        figNum = figInfo.Number;        
+    else
+        figNum = figInfo;
+    end
 else
     figNum = figHandles(1);
     figure(figNum);
@@ -47,43 +67,82 @@ else
         subplot(figHandles(2),figHandles(3),figHandles(4));
     elseif length(figHandles)>4
         subplot('position',figHandles(2:end));
+        hexagArrag = true;
+    end
+    if isLogSpaced(binLevels)
+        set(gca,'XScale','log');
     end
 end
 
-set(gca,'FontSize',10);
-nBins = max(pdData(:,binIx));
-meanTrialIx = pdData(:,trialIx) == 0 & pdData(:,binIx)~=0 & pdData(:,freqIx)==freqNum;
-meanTrialMat = pdData(meanTrialIx,:);
-
-if range(binLevels) > 10
-    semilogx(binLevels,zeros(1,length(binLevels)),'k-','LineWidth',2);
-    hold on;
-    semilogx(binLevels,meanTrialMat(:,amplIx),'ko-','Color',dataColor,'MarkerFaceColor',dataColor,'LineWidth',2);    
-    % if individual data, use errorIx values as CIs, else use bootstrapped
-    % ###
-    %errorbar(binLevels,meanTrialMat(:,amplIx),meanTrialMat(:,errorIx),'k-','Color',dataColor,'LineWidth',2);
-    semilogx(binLevels,meanTrialMat(:,noiseIx),'ks','Color',dataColor);
-    set(gca,'TickDir','out');
+if hexagArrag
+    mrkrSz = 10;
 else
-    plot([floor(binLevels(1)) ceil(binLevels(end))],[0 0],'k-','LineWidth',2);
-    hold on;
-    plot(binLevels,meanTrialMat(:,amplIx),'ko-','Color',dataColor,'MarkerFaceColor',dataColor,'LineWidth',2);
-    plot(binLevels,meanTrialMat(:,noiseIx),'ks','Color',dataColor);
-    hold on;
+    mrkrSz = 14;
 end
-ylabel('Amplitude (\muV)')
-xlabel('Bin Values')
-title('Amplitude (\muV)')
+
+nBins = max(pdData(:,binIx));
+
+% Get the mean trial data only (as computed by PowerDiva)
+meanTrialRows = pdData(:,trialIx) == 0 & pdData(:,binIx) ~= 0 & pdData(:,freqIx) == freqNum;
+meanTrialMat = pdData(meanTrialRows,:);
+
+switch plotType
+    case 'Ampl'
+        indexToPlot = amplIx;
+        % Get the error estimates for confidence intervals on the means
+        amplErrorRange = nan(2,nBins);
+        for binNum = 1:nBins
+            crntBinRows = pdData(:,binIx)==binNum;
+            crntFreqRows = pdData(:,freqIx)==freqNum;
+            allowedRows = crntBinRows & crntFreqRows;
+            trialNums = pdData(allowedRows,trialIx);
+            allowedRows = allowedRows & pdData(:,trialIx)>0; % 0th trial is the mean trial
+            Sr = pdData(allowedRows,srIx);
+            Si = pdData(allowedRows,siIx);
+            allowedData = pdData(allowedRows,amplIx)>0; % important because samples with 0 mean are from epochs excluded by PowerDiva
+            xyData = [Sr(allowedData) Si(allowedData)];
+            
+            amplErrorRange(:,binNum) = fitErrorEllipse(xyData,errType);
+        end
+        if ~hexagArrag, ylabel('Amplitude (\muV)'), end
+    case 'SNR'
+        indexToPlot = SNRIx;
+        if ~hexagArrag, ylabel('SNR'), end
+end
 
 
-hold on;
-if ~isempty(bootData)
+figure(figNum);
+% Plot mean data (filled circles):
+if isLogSpaced(binLevels)
+    hold on;
+    plotNum = semilogx(binLevels,meanTrialMat(:,indexToPlot),'ko-','Color',dataColor,'MarkerFaceColor',dataColor,'LineWidth',2);   
+    if strcmp(plotType,'Ampl')
+        % with noise estimates (empty squares)
+        semilogx(binLevels,meanTrialMat(:,noiseIx),'ks','Color',dataColor,'MarkerSize',mrkrSz);
+    end
+else
+    hold on;
+    plotNum = plot(binLevels,meanTrialMat(:,indexToPlot),'ko-','Color',dataColor,'MarkerFaceColor',dataColor,'LineWidth',2);
+    if strcmp(plotType,'Ampl')
+        plot(binLevels,meanTrialMat(:,noiseIx),'ks','Color',dataColor,'MarkerSize',mrkrSz);
+    end
+end
+
+if strcmp(plotType,'Ampl')
+    % Plot error bars on the means (don't use built-in Matlab errorbar
+    % function because it makes ugly "tees," the horizontal lines, sometimes)
     for binNum = 1:nBins
-        plot([binLevels(binNum) binLevels(binNum)],[meanTrialMat(binNum,amplIx) meanTrialMat(binNum,amplIx)] ...
-            +[-1*std(bootData.resampledVectAmplitudes(:,binNum)) std(bootData.resampledVectAmplitudes(:,binNum))],'k-','Color',dataColor,'LineWidth',2);
-        hold on;
-    end    
-    ylabel('Ampl. +/- \sigma')
+        plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
+    end
 end
 
-plottedVals = meanTrialMat(:,amplIx);
+set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
+if ~hexagArrag
+    xlabel('Bin Values')
+    set(gca,'ticklength',1.5*get(gca,'ticklength'))
+else
+    axis square
+    box off
+    set(gca,'ticklength',2.5*get(gca,'ticklength'))
+end
+set(gca,'tickDir','out')

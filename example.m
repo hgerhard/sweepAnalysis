@@ -1,112 +1,128 @@
 % Sweep Analysis Example Script
 
 %% 1. Set parameters specifying which data to process:
-dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/'; % specify directory
-channels = [70 75]; % could be e.g.: [66 70 71 72 73 74 75 76 82 83 88];
+setPath;
+dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/'; % specify directory where RLS or DFT files are
+channels = [71 76 70 75 83 74 82]; % this works well for hexagonal plots, but it could be anything, e.g.: [66 70 71 72 73 74 75 76 82 83 88];
 sweepEstType = 'RLS'; % or 'DFT'
-exptName = 'DisparityExperiment'; % optional input to makeDataStructure
-condNames = {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}; % optional input to makeDataStructure
+% 2 optional inputs to makeDataStructure:
+exptName = 'DisparityExperiment'; 
+condNames = {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}; 
 
-%% 2. Read in PowerDiva data to [NumConditions X length(channels)] array of structs containing sweep data & info.:
+%% 2. Read in PowerDiva data to [ NumConditions X length(channels) ] array of structs containing sweep data & info.:
 pdData = makeDataStructure(dataDir,channels,sweepEstType,exptName,condNames);
 
-%% 3. Set some common variables used for plotting:
-allColors = [1 0 0; 0 0 1; 0 1 0; 1 0 1; 0 1 1; 0 0 0]; % specify RGB triplets in rows as desired (usually 1 row/condition)
-dataMatrixHdr = pdData(1).hdrFields; % hdrFields is the same for all conditions/electrodes
+%% 3. Set the desired colors used for plotting (if not provided to plotting routines, default colors used):
+conditionColors = [1 0 0; 0 0 1; 0 1 0; 1 0 1; 0 1 1; 0 0 0]; % specify RGB triplets in rows as desired (1 row/condition)
 
-%% Create sweep plots of amplitude as a function of bin value, with SEM error bars
-% (### want to create a wrapper function for generating plots with mulitple
-% variables, etc.)
-for freqNum = 1 %1F1 & 1F2 for now
-    for chanNum = 2;%1:length(channels)
-        
-        condNum = 1;
-        figNum = plotSweep( pdData(condNum,chanNum).dataMatrix, dataMatrixHdr, ...
-            pdData(condNum,chanNum).binLevels, freqNum, allColors(condNum,:) );
-        
-        %[figNum,meanAmp] = plotSweep(pdData,dataHdr,binLevels,freqNum,colorVal,figHandles,errType,withinSubj,extraData,plotSettings)
-        
-        condNum = 2;
-        plotSweep( pdData(condNum,chanNum).dataMatrix, dataMatrixHdr, ...
-            pdData(condNum,chanNum).binLevels, freqNum, allColors(condNum,:), figNum );
-        %export_fig(sprintf('~/Experiments/3DThresh/Plots/SweepsC1C2_%s_%s_Chan%d_%s.pdf',pdData(condNum,chanNum).comment,sweepEstType,pdData(condNum,chanNum).channel,pdData(condNum,chanNum).avFreqs{freqNum}))
-        %close;
-        
-        condNum = 3;
-        figNum = plotSweep( pdData(condNum,chanNum).dataMatrix, dataMatrixHdr, ...
-            pdData(condNum,chanNum).binLevels, freqNum, allColors(condNum,:) );
-        
-        condNum = 4;
-        plotSweep( pdData(condNum,chanNum).dataMatrix, dataMatrixHdr, ...
-            pdData(condNum,chanNum).binLevels, freqNum, allColors(condNum,:), figNum  );
-        
-        %export_fig(sprintf('~/Experiments/3DThresh/Plots/SweepsC3C4_%s_%s_Chan%d_%s.pdf',pdData(condNum,chanNum).comment,sweepEstType,pdData(condNum,chanNum).channel,pdData(condNum,chanNum).avFreqs{freqNum}))
-        %close;
-        
+%% Create sweep plots of amplitude as a function of bin value, with SEM error bars 
+%% (OR change 'Ampl' -- the first input parameter -- to 'SNR' for SNR plots without error bars)
+
+% Example) Plot Conditions 1 & 2 for electrode 76 & the 1st frequency component:
+freqIxToPlot = 1;
+chanIxToPlot = 2; % channels(2) = 76;
+condsToPlot = 1:2;
+
+figNum = [];
+plotNum = nan(1,max(condsToPlot));
+for freqNum = freqIxToPlot
+    for chanNum = chanIxToPlot        
+        for condNum = condsToPlot
+            
+            [figNum,plotNum(condNum)] = plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
+                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', conditionColors(condNum,:), figNum );
+        end
     end
 end
 
-%% THE FOLLOWING IS ALL STILL IN DEVELOPMENT/NEEDS TO BE UPDATED
+legend(plotNum(~isnan(plotNum)),condNames(condsToPlot),'Location','NorthWest')
 
 
-%%   - Bin by bin polar plots of individ subject data points with means &
-%   error regions (from bootstrapping), difference between group data for
-%   two comparison conditions; include permutation test results for the
-%   comparison
+%% Create panel of polar plots, one for each bin, showing the individual 2D data points as twigs, 
+%% and the combined error ellipse as a transparent surface, to observe how data evolve
+%% over the bin levels
 
-for freqNum = 1%[1 5] %1F1 & 1F2 for now
-    for chanNum = 2;%1:length(channels)
-        % Compare conditions 1 & 2
-        condNum = 1;
-        figNum = plotPolarBins( pdData(condNum,chanNum).dataMatrix, bootData(condNum,chanNum,freqNum), ...
-            dataMatrixHdr, pdData(condNum,chanNum).binLevels, freqNum, allColors(:,:,condNum), borderColors{condNum} );
-        condNum = 2;
-        plotPolarBins( pdData(condNum,chanNum).dataMatrix, bootData(condNum,chanNum,freqNum), ...
-            dataMatrixHdr, pdData(condNum,chanNum).binLevels, freqNum, allColors(:,:,condNum), borderColors{condNum}, figNum );
-        %export_fig(sprintf('~/Experiments/3DThresh/Plots/C1vsC2_%s_%s_Chan%d_%s.pdf',pdData(condNum,chanNum).comment,sweepEstType,pdData(condNum,chanNum).channel,pdData(condNum,chanNum).avFreqs{freqNum}))
-        %close;
-        
-        % Compare conditions 3 & 4
-        condNum = 3;
-        figNum = plotPolarBins( pdData(condNum,chanNum).dataMatrix, bootData(condNum,chanNum,freqNum), ...
-            dataMatrixHdr, pdData(condNum,chanNum).binLevels, freqNum, allColors(:,:,condNum), borderColors{condNum} );
-        condNum = 4;
-        plotPolarBins( pdData(condNum,chanNum).dataMatrix, bootData(condNum,chanNum,freqNum), ...
-            dataMatrixHdr, pdData(condNum,chanNum).binLevels, freqNum, allColors(:,:,condNum), borderColors{condNum}, figNum );
-        %export_fig(sprintf('~/Experiments/3DThresh/Plots/C3vsC4_%s_%s_Chan%d_%s.pdf',pdData(condNum,chanNum).comment,sweepEstType,pdData(condNum,chanNum).channel,pdData(condNum,chanNum).avFreqs{freqNum}))
-        %close;
+% Example) Plot Conditions 1 & 2 for electrode 76 & the 1st frequency component:
+freqIxToPlot = 1;
+chanIxToPlot = 2; % channels(2) = 76;
+condsToPlot = 1:2;
+
+figNum = [];
+for freqNum = freqIxToPlot
+    for chanNum = chanIxToPlot        
+        for condNum = condsToPlot
+            
+            figNum = plotPolarBins(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,pdData(condNum,chanNum).binLevels,freqNum,conditionColors(condNum,:),figNum);
+
+        end
     end
 end
 
-%%  - Plot of Condition Comparison: Thresholds
+%% Create bar plots showing how many trials were accepted out of the total number run,
+%% for each bin separately. This is mainly useful for checking how well an individual
+%% participant did in the experiment. For example, try this for the provided individual 
+%% participant data in exampleData/PowerDivaHostSingleSubject_Exp_TEXT_HCN_128_Avg/
+
+freqIxToPlot = 1;
+chanIxToPlot = 2; % channels(2) = 76;
+condsToPlot = 1:2;
+
+figNum = [];
+for freqNum = freqIxToPlot
+    for chanNum = chanIxToPlot        
+        for condNum = condsToPlot
+            plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,freqNum,conditionColors(condNum,:),figNum);
+        end
+    end
+end
+
+%% Create a panel of plots arranged hexagonally following the geodesic layout of the net
+%% 
+%% In this example, 'SNR' is requested, but that can be swapped out for 'Ampl'
+
+subplotLocs = getHexagSubPlotLocations;
+
+chanIxToPlot = 1:length(channels); 
+condsToPlot = 1:2;
 freqNum = 1;
-for chanNum = 2;%1:length(channels)
-    figNum = plotThresh(pdData(1,chanNum).dataMatrix,pdData(2,chanNum).dataMatrix,dataMatrixHdr,freqNum,borderColors{1},borderColors{2},...
-        pdData(1,chanNum).condName,pdData(2,chanNum).condName);
-    figNum = plotThresh(pdData(3,chanNum).dataMatrix,pdData(4,chanNum).dataMatrix,dataMatrixHdr,freqNum,borderColors{3},borderColors{4},...
-        pdData(3,chanNum).condName,pdData(4,chanNum).condName);
-    
-    figNum = plotThresh(pdData(1,chanNum).dataMatrix,pdData(3,chanNum).dataMatrix,dataMatrixHdr,freqNum,borderColors{1},borderColors{3},...
-        pdData(1,chanNum).condName,pdData(3,chanNum).condName);
-    plotThresh(pdData(2,chanNum).dataMatrix,pdData(4,chanNum).dataMatrix,dataMatrixHdr,freqNum,borderColors{2},borderColors{4},...
-        pdData(2,chanNum).condName,pdData(4,chanNum).condName);
-end
 
-%%  - Plot of Condition Comparison: SNR
-for freqNum = [1 5] %1F1 & 1F2 for now
-    for chanNum = 2%1:length(channels)
+figNum = 10;
+figure(figNum);
+clf;
+for chanNum = chanIxToPlot
+    for condNum = condsToPlot
         
-        figNum = plotSNR(pdData(1,chanNum).dataMatrix,dataMatrixHdr,pdData(1,chanNum).binLevels,freqNum,allColors(:,:,1),borderColors{1});
-        plotSNR(pdData(2,chanNum).dataMatrix,dataMatrixHdr,pdData(2,chanNum).binLevels,freqNum,allColors(:,:,2),borderColors{2},figNum);
-        export_fig(sprintf('~/Experiments/3DThresh/Plots/SNR_C1C2_%s_%s_Chan%d_%s.pdf',pdData(condNum,chanNum).comment,sweepEstType,pdData(condNum,chanNum).channel,pdData(condNum,chanNum).avFreqs{freqNum}))
-        close;
-        
-        figNum =plotSNR(pdData(3,chanNum).dataMatrix,dataMatrixHdr,pdData(3,chanNum).binLevels,freqNum,allColors(:,:,3),borderColors{3});
-        plotSNR(pdData(4,chanNum).dataMatrix,dataMatrixHdr,pdData(4,chanNum).binLevels,freqNum,allColors(:,:,4),borderColors{4},figNum);
-        export_fig(sprintf('~/Experiments/3DThresh/Plots/SNR_C3C4_%s_%s_Chan%d_%s.pdf',pdData(condNum,chanNum).comment,sweepEstType,pdData(condNum,chanNum).channel,pdData(condNum,chanNum).avFreqs{freqNum}))
-        close;
-        
+        plotSweepPD( 'SNR', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
+            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', conditionColors(condNum,:), [figNum,subplotLocs(chanNum,:)] );
+        set(gca,'YTick',[0 max(ylim)/4 max(ylim)/2 3*max(ylim)/4 max(ylim)])
+        if condNum == condsToPlot(end)
+            % add text to label channel numbers for each subplot
+            text(1.2*pdData(condNum,chanNum).binLevels(1),max(ylim)-(max(ylim)/10),sprintf('%d',channels(chanNum)),'FontSize',14)
+        end
+
     end
 end
 
+%% In this example, the number of trials bar plot is shown for each channel:
 
+subplotLocs = getHexagSubPlotLocations;
+
+freqIxToPlot = 1;
+chanIxToPlot = 1:length(channels); 
+condsToPlot = 2;
+freqNum = 1;
+
+figNum = 20;
+figure(figNum);
+clf;
+for chanNum = chanIxToPlot
+    for condNum = condsToPlot
+        
+        plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,freqNum,conditionColors(condNum,:),[figNum,subplotLocs(chanNum,:)]);
+        if condNum == condsToPlot(end)
+            % add text to label channel numbers for each subplot
+            text(1.2*pdData(condNum,chanNum).binLevels(1),max(ylim)-(max(ylim)/10),sprintf('%d',channels(chanNum)),'FontSize',14)
+        end
+
+    end
+end
