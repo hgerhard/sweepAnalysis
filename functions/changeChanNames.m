@@ -29,9 +29,22 @@ function [newData] = changeChanNames(colHdr, data, oldMap, newMap)
     oldToNewMap = containers.Map('KeyType', 'double', 'ValueType', 'double');
     oldMapKeys = keys(oldMap);
     newMapKeys = keys(newMap);
+    % This for loop checks to make sure that the new map keys are also in
+    % the old map keys (i.e. both dictionaries are mapping from the same
+    % channel names)
+    for i = 1:length(oldMapKeys)
+        if isempty(find(strcmp(newMapKeys, oldMapKeys(i)), 1))
+            fprintf('Error! Invalid new map for channel names');
+            newData = data;
+            return
+        end
+    end
+    
+    % This for loop create a new dictionary mapping old values (from
+    % default map of getSweepDataFlex.m) to new values given by user
     for i = 1:length(oldMapKeys)
         oldVal = oldMap(oldMapKeys{i});
-        newVal = newMap(newMapKeys{i});
+        newVal = newMap(oldMapKeys{i});
         oldToNewMap(oldVal) = newVal;
     end
     
