@@ -16,7 +16,7 @@ for k = 1:length(dataHdr)
             srIx = k;
         case 'Si'
             siIx = k;
-        case 'ampl'
+        case 'Signal'
             amplIx = k;
     end
 end
