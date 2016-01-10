@@ -86,8 +86,10 @@ end
 
 dati{1,channelIx}=chan';
 %colsToKeep=[2 3 4 5 11 13 14]; % Stefano's columns
-colsToKeep=[2 3 4 5 11 19 22 21 24 20 28 30 13 14];  % Select columns for essential matrix
-% 2 iCond; 3 iTrial; 4 iCh; 5 iFr; 11 iBin; 19 Signal; 22 Error; 21 Noise; 24 SNR; 20 Phase; 28 Thresh; 30 Slope; 13 Sr; 14 Si
+colsToKeep=[2 3 4 5 11 19 22 21 24 20 13 14 15 16 17 18];  % Select columns for essential matrix
+% 2 iCond; 3 iTrial; 4 iCh; 5 iFr; 11 iBin; 19 Signal; 22 Error; 21 Noise;
+% 24 SNR; 20 Phase; 13 Sr; 14 Si; 15:18 = Fourier coefficients for the two
+% side band frequencies used for estimating the noise
 
 % Fill in essential matrix
 for s=1:length(colsToKeep)
@@ -133,10 +135,8 @@ freqsAnalyzed = freqsAnalyzed(tmpIx);
 % zeroSubjInd=find(dataMatrix(:,2)>0); % Selects all subjects but the 0th one, which is the average over all subjects
 % dataMatrix=dataMatrix(zeroSubjInd, :);
 
-dataMatrix(:,end+1)=sqrt(dataMatrix(:,end-1).^2+dataMatrix(:,end).^2); % Computes amplitudes in final column (same as column with signal??)
 
 for m = 1:length(colsToKeep)
     colHdr{m} = hdrFields{colsToKeep(m),1};
 end
-colHdr{end+1} = 'ampl';
 end

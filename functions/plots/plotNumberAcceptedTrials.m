@@ -14,7 +14,7 @@ for k = 1:length(dataHdr)
             freqIx = k;
         case 'iBin'
             binIx = k;
-        case 'ampl'
+        case 'Signal'
             amplIx = k;
     end
 end

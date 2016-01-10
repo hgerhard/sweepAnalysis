@@ -16,7 +16,7 @@ for k = 1:length(dataHdr)
             srIx = k;
         case 'Si'
             siIx = k;
-        case 'ampl'
+        case 'Signal'
             amplIx = k;
     end
 end
@@ -64,7 +64,7 @@ for binNum = 1:nBins
     Si = Si(allowedData);
     xyData = [Sr Si];  
     
-    errorEllipse = getErrorEllipse(xyData);
+    errorEllipse = fitErrorEllipse(xyData);
     
     for k = 1:length(xyData) % which is the number of subjects if this is project data, or the number of trials if individ. subject data
         plot([0 Sr(k)],[0 Si(k)],'k-','Color',colorVal,'LineWidth',1);
