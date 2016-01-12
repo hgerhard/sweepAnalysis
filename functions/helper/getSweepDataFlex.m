@@ -14,6 +14,9 @@ function [colHdr, freqsAnalyzed, binLevels, dataMatrix, channelNameDict] = getSw
 % freqsAnalyzed   are the individual frequencies of the VEPs ('1F1' etc.)
 % binLevels       are the contrasts or stimulus values used
 % dataMatrix      matrix containing the desired data
+%
+% If the data file 'iCh' values are not of the form hc%d, no filtering of
+% channels is done.
 
 % column headers of the data file
 hdrFields = {
