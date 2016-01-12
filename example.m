@@ -20,13 +20,13 @@ conditionColors = [1 0 0; 0 0 1; 0 1 0; 1 0 1; 0 1 1; 0 0 0]; % specify RGB trip
 
 % Example) Plot Conditions 1 & 2 for electrode 76 & the 1st frequency component:
 freqIxToPlot = 1;
-chanIxToPlot = 2; % channels(2) = 76;
+chanIxToPlot = 1; % channels(2) = 76;
 condsToPlot = 1:2;
 
 figNum = [];
 plotNum = nan(1,max(condsToPlot));
 for freqNum = freqIxToPlot
-    for chanNum = chanIxToPlot        
+    for chanNum = chanIxToPlot
         for condNum = condsToPlot
             
             [figNum,plotNum(condNum)] = plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
@@ -126,3 +126,27 @@ for chanNum = chanIxToPlot
 
     end
 end
+
+
+%% This example shows how to use appendSegToData.m
+% Using example data that has the segFile data
+fprintf('Reading data...\n');
+[cols, freqs, bins, data, chanDict] = getSweepDataFlex('exampleData/tACS_withResponseExports/RLS_c001.txt');
+fprintf('Appending seg info...\n');
+[newColHdr, newData] = appendSegToData(cols, data, 'exampleData/tACS_withResponseExports/RTSeg_s002.mat');
+
+% Or, you can read in the data using makeDataStructure and then change the
+% data matrix of the data
+% dataDir = 'exampleData/tACS_withResponseExports';
+% example_segPdData = makeDataStructure(dataDir, [1], 'RLS', 'Example Exp', {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
+% [example_segPdData.hdrFields, example_segPdData.dataMatrix] = appendSegToData(example_segPdData.hdrFields, example_segPdData.dataMatrix, ...
+%                                                                               'exampleData/tACS_withResponseExports/RTSeg_s002.mat');
+
+%% This example shows how to use plotGroupComparison.m
+dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
+
+% Just using same data directory for the groups, but obviously, it can be
+% different data directories.
+plotGroupComparison({dataDir, dataDir}, {'Name1', 'Name2'}, [71 76 70 75 83 74 82], {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}, 'RLS');
+
+
