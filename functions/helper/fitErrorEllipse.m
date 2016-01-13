@@ -17,6 +17,8 @@ function [amplBounds,errorEllipse] = fitErrorEllipse(xyData,ellipseType,makePlot
 %   direction. An ellipse is then fit to this data, at a distance from the
 %   mean datapoint depending on the type of ellipseType specified.
 
+xyData = double(xyData); 
+
 if nargin<2 || isempty(ellipseType)
     ellipseType = 'SEM';
 end

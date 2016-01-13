@@ -64,14 +64,20 @@ for binNum = 1:nBins
     Si = Si(allowedData);
     xyData = [Sr Si];  
     
-    errorEllipse = fitErrorEllipse(xyData);
+    try
+        errorEllipse = fitErrorEllipse(xyData);
+    catch
+    end
     
     for k = 1:length(xyData) % which is the number of subjects if this is project data, or the number of trials if individ. subject data
         plot([0 Sr(k)],[0 Si(k)],'k-','Color',colorVal,'LineWidth',1);
         %plot(Sr(k),Si(k),'ko','MarkerFaceColor',colorVal,'MarkerEdgeColor',colorVal,'MarkerSize',6);
     end
     plot([0 mean(Sr)],[0 mean(Si)],'k-','Color',colorVal,'LineWidth',2);
-    fill(errorEllipse(:,1),errorEllipse(:,2),colorVal,'EdgeColor','none','FaceAlpha',0.5);
+    try
+        fill(errorEllipse(:,1),errorEllipse(:,2),colorVal,'EdgeColor','none','FaceAlpha',0.5);
+    catch
+    end
     
     axis tight
     ylimits(cnt,:) = ylim;

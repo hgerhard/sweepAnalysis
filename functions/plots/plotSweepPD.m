@@ -102,7 +102,10 @@ switch plotType
             allowedData = pdData(allowedRows,amplIx)>0; % important because samples with 0 mean are from epochs excluded by PowerDiva
             xyData = [Sr(allowedData) Si(allowedData)];
             
-            amplErrorRange(:,binNum) = fitErrorEllipse(xyData,errType);
+            try
+                amplErrorRange(:,binNum) = fitErrorEllipse(xyData,errType);
+            catch
+            end
         end
         if ~hexagArrag, ylabel('Amplitude (\muV)'), end
     case 'SNR'
@@ -132,7 +135,10 @@ if strcmp(plotType,'Ampl')
     % Plot error bars on the means (don't use built-in Matlab errorbar
     % function because it makes ugly "tees," the horizontal lines, sometimes)
     for binNum = 1:nBins
-        plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
+        try
+            plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
+        catch
+        end
     end
 end
 
