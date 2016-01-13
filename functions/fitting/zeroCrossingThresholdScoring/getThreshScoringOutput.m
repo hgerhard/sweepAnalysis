@@ -22,21 +22,23 @@ else
 end
 bounds = [tLSB,tRSB];
 
-% now perform jackknifing to get error estimates on tThr & tSlp
 tThrStdErr = nan;
 tSlpStdErr = nan;
 
-nSubj = size(sweepMatSubjects,3); % by definition, 3rd dimension is subject number
-
-subsetIndices = logical( ones( nSubj ) - ones( nSubj ) .* diag( ones( nSubj, 1 ) ) );
-
-for subj = 1:nSubj
-    allSubjsButOne = subsetIndices( :, subj );
-    [ thresh, slope ] = powerDivaScoring(sweepMatSubjects(:,:,allSubjsButOne), binLevels, bounds);
-    subsetThreshVals( subj ) = thresh;
-    subsetSlopeVals( subj ) = slope;
+if ~isnan(tThr)
+    % now perform jackknifing to get error estimates on tThr & tSlp
+    
+    nSubj = size(sweepMatSubjects,3); % by definition, 3rd dimension is subject number
+    
+    subsetIndices = logical( ones( nSubj ) - ones( nSubj ) .* diag( ones( nSubj, 1 ) ) );
+    
+    for subj = 1:nSubj
+        allSubjsButOne = subsetIndices( :, subj );
+        [ thresh, slope ] = powerDivaScoring(sweepMatSubjects(:,:,allSubjsButOne), binLevels, bounds);
+        subsetThreshVals( subj ) = thresh;
+        subsetSlopeVals( subj ) = slope;
+    end
+    
+    tThrStdErr = jackKnifeErr(subsetThreshVals);
+    tSlpStdErr = jackKnifeErr(subsetSlopeVals);    
 end
-
-tThrStdErr = jackKnifeErr(subsetThreshVals);
-tSlpStdErr = jackKnifeErr(subsetSlopeVals);
-

@@ -184,7 +184,6 @@ if plotThreshFit && threshFitted
     % add shaded error region on threshold values:
     h = fill([threshVal-threshStdErr threshVal+threshStdErr threshVal+threshStdErr threshVal-threshStdErr],...
         [min(ylim) min(ylim) max(ylim) max(ylim)],'k');
-    get(h)
     set(h,'LineStyle','none','FaceAlpha',0.2,'FaceColor',dataColor);
     
     if isLogSpaced(binLevels)
