@@ -63,7 +63,7 @@ for binNum = 1:nBins
     xyData = [Sr Si];  
     
     try
-        errorEllipse = fitErrorEllipse(xyData);
+        [~,errorEllipse] = fitErrorEllipse(xyData);
     catch
     end
     
