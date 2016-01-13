@@ -1,13 +1,11 @@
 function figNum = plotPolarBins(pdData,dataHdr,binLevels,freqNum,colorVal,figNum)
+% figNum = plotPolarBins(pdData,dataHdr,binLevels,freqNum,colorVal,figNum)
+%
+% Creates a multipanel plot containing one panel per bin where all of the
+% individual samples for the data are plotted in 2D with an error ellipse.
 
 for k = 1:length(dataHdr)
     switch dataHdr{k}
-        case 'iCond'
-            condIx = k;
-        case 'iTrial'
-            trialIx = k;
-        case 'iCh'
-            chanIx = k;
         case 'iFr'
             freqIx = k;
         case 'iBin'
@@ -77,6 +75,7 @@ for binNum = 1:nBins
     try
         fill(errorEllipse(:,1),errorEllipse(:,2),colorVal,'EdgeColor','none','FaceAlpha',0.5);
     catch
+        fprintf('An error ellipse could not be plotted on your data, probably your data do not contain >1 sample?');
     end
     
     axis tight

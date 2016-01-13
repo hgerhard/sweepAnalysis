@@ -137,7 +137,8 @@ if strcmp(plotType,'Ampl')
     for binNum = 1:nBins
         try
             plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
-        catch
+        catch            
+            fprintf('Error bars could not be plotted on your data, probably your data do not contain >1 sample.');
         end
     end
 end
