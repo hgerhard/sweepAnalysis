@@ -62,16 +62,17 @@ switch ellipseType
         a = sqrt(larger_eigenval)/sqrt(N); % contour at stdDev/sqrt(N)
         b = sqrt(smaller_eigenval)/sqrt(N);
     case '95CI'
-        Tsq = ((N-1)*2)/(N-2) * finv( 0.95, 2, N - 2 );
-        a = sqrt(larger_eigenval*Tsq);
-        b = sqrt(smaller_eigenval*Tsq);
+        % t0_sqrd is from Eqn. 2 in Sec. 5.3 of Anderson (1984)
+        t0_sqrd = ((N-1)*2)/(N-2) * finv( 0.95, 2, N - 2 ); % 0.95 or 0.05? finv? fpdf? ###
+        a = sqrt(larger_eigenval*t0_sqrd);
+        b = sqrt(smaller_eigenval*t0_sqrd);
     otherwise
         if strcmp(ellipseType(end-1:end),'CI')
             critVal = str2double(ellipseType(1:end-2))./100;
             if critVal < 1 && critVal > 0
-                Tsq = ((N-1)*2)/(N-2) * finv( critVal, 2, N - 2 );
-                a = sqrt(larger_eigenval*Tsq);
-                b = sqrt(smaller_eigenval*Tsq);
+                t0_sqrd = ((N-1)*2)/(N-2) * finv( critVal, 2, N - 2 ); % 0.95 or 0.05? finv? fpdf? ###
+                a = sqrt(larger_eigenval*t0_sqrd);
+                b = sqrt(smaller_eigenval*t0_sqrd);
             else
                 error('CI range must be on the interval (0, 100). Please see the help!')
             end

@@ -1,7 +1,7 @@
-function [mu,covMat,smaller_eigenvec,smaller_eigenval,larger_eigenvec,larger_eigenval,phi] = eigFourierCoefs(xyData)
-% [mu,covMat,smaller_eigenvec,smaller_eigenval,larger_eigenvec,larger_eigenval,phi] = eigFourierCoefs(xyData)
+function [sampMu,sampCovMat,smaller_eigenvec,smaller_eigenval,larger_eigenvec,larger_eigenval,phi] = eigFourierCoefs(xyData)
+% [sampMu,sampCovMat,smaller_eigenvec,smaller_eigenval,larger_eigenvec,larger_eigenval,phi] = eigFourierCoefs(xyData)
 % 
-% perform the eigenvalue decomposition on the 2D data xyData and return
+% Perform the eigenvalue decomposition on the 2D data xyData and return
 % some useful calculations (e.g. for fitting an ellipse to the
 % distribution or for conducting a 2D statistical test). 
 %
@@ -12,18 +12,18 @@ function [mu,covMat,smaller_eigenvec,smaller_eigenval,larger_eigenvec,larger_eig
 dims = size(xyData);
 N = dims(1);
 if dims(2) ~= 2
-    error('input data must be a matrix of 2D row samples');
+    error('input data sampMust be a matrix of 2D row samples');
 end
 if N < 2
-    error('input data must contain at least 2 samples');
+    error('input data sampMust contain at least 2 samples');
 end
 
 srIx = 1;
 siIx = 2;
 
-mu = mean(xyData);
-covMat = cov([xyData(:,srIx),xyData(:,siIx)]);
-[eigenvec, eigenval] = eig(covMat);
+sampMu = mean(xyData);
+sampCovMat = cov([xyData(:,srIx),xyData(:,siIx)]);
+[eigenvec, eigenval] = eig(sampCovMat);
 
 % sort the eigenvectors by their eigenvalues
 [orderedVals,eigAscendIx] = sort(diag(eigenval));

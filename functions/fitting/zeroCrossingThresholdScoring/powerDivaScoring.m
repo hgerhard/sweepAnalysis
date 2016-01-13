@@ -1,5 +1,25 @@
-function [ tThr, tSlp, tLSB, tRSB, tYFit, tYFitAllPos, tXX] = powerDivaScoring(sweepMatSubjects, tSweepVal,bounds)
-% assumes increasing visibility!
+function [ tThr, tSlp, tLSB, tRSB, tYFit, tYFitAllPos, tXX] = powerDivaScoring(sweepMatSubjects, binLevels, bounds)
+%
+% [ tThr, tSlp, tLSB, tRSB, tYFit, tYFitAllPos, tXX] = powerDivaScoring(sweepMatSubjects, binLevels, [bounds])
+%
+% Code from Mark Pettet to fit a monotonically increasing function to the
+% sweep data stored in sweepMatSubjects in order to extrapolate to zero and
+% estimate a neural threshold.
+%
+% The sweepMatSubjects matrix must be provided. It is a  3-D matrix that is
+% NSteps x 6(triad terms) x NSubjects(or NTrials), which is produced via
+% the function constructSweepMatSubjects.m. 
+%
+% The stimulus levels for the sweep must be provided in binLevels.
+%
+% Optionally provide bounds, a 2-element vector specifying the indices of
+% the binLevels encompassing the range of data you wish to fit the function
+% to.
+%
+% Note, the function assumes increasing visibility along the row dimension 
+% of sweepMatSubjects and coorespondingly along binLevels. If this is not
+% the case, you should reverse the ordering and then mirror the result. A
+% future version of the code should handle this automatically.
 
 if nargin<3
     [ tThr, tSlp, xRange ] = HybridNewOldScore( SweepMat( sweepMatSubjects ) );
@@ -12,14 +32,14 @@ tLSB = xRange( 1 );
 tRSB = xRange( 2 );
 
 tStartBin = 1;
-tNBins = length( tSweepVal );
+tNBins = length( binLevels );
 tEndBin = tNBins;
-tStart = tSweepVal( tStartBin );
-tEnd = tSweepVal( tEndBin );
+tStart = binLevels( tStartBin );
+tEnd = binLevels( tEndBin );
 
-tIsLog = isLogSpaced(tSweepVal);
+tIsLog = isLogSpaced(binLevels);
 
-tNBins = length( tSweepVal );
+tNBins = length( binLevels );
 tYFit = tSlp * ( [ tLSB:tRSB ]' - tThr );
 tYFitAllPos = tSlp * ( [ 1:tNBins ]' - tThr );
 posIx = tYFitAllPos>0;
@@ -42,4 +62,4 @@ else
     % otherwise, if linear, also express slope in stimulus units
     tSlp = tSlp / ( tEnd - tStart ) * ( tNBins - 1 );
 end
-tXX = [tThr tSweepVal(posIx)];
+tXX = [tThr binLevels(posIx)];
