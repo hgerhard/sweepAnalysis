@@ -22,7 +22,11 @@ function [amplBounds,errorEllipse] = fitErrorEllipse(xyData,ellipseType,makePlot
 %   Chapter 5 of Johnson & Wickern (2007) Applied Multivariate Statistical
 %   Analysis, Pearson Prentice Hall.
 %
-%   Dependency: eigFourierCoefs.m which is also in functions/helper/
+%   DEPENDENCY: eigFourierCoefs.m which is part of the GitHub repository
+%   sweepAnalysis/ in functions/helper/
+% 
+%   To download this repository go to:
+%   https://github.com/hgerhard/sweepAnalysis
 
 xyData = double(xyData); 
 
