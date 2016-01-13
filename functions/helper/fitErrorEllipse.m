@@ -16,6 +16,8 @@ function [amplBounds,errorEllipse] = fitErrorEllipse(xyData,ellipseType,makePlot
 %   eigenvalues of each eigen vector correspond to the variances along each
 %   direction. An ellipse is then fit to this data, at a distance from the
 %   mean datapoint depending on the type of ellipseType specified.
+%
+%   Dependency: eigFourierCoefs.m which is also in functions/helper/
 
 xyData = double(xyData); 
 
@@ -38,44 +40,38 @@ end
 srIx = 1;
 siIx = 2;
 
-[eigenvec, eigenval] = eig(cov([xyData(:,srIx),xyData(:,siIx)]));
-[orderedVals,eigAscendIx] = sort(diag(eigenval));
-smallest_eigenvec = eigenvec(:,eigAscendIx(1));
-largest_eigenvec = eigenvec(:,eigAscendIx(2));
-smallest_eigenval = orderedVals(1);
-largest_eigenval = orderedVals(2);
-phi = atan2(largest_eigenvec(2), largest_eigenvec(1));
-% This angle is between -pi and pi, shift to 0 and 2pi:
-if(phi < 0)
-    phi = phi + 2*pi;
+try
+    [meanXy,~,smaller_eigenvec,smaller_eigenval,larger_eigenvec,larger_eigenval,phi] = eigFourierCoefs(xyData);
+catch
+    fprintf('The eigen value decomposition of xyData could not be run, probably your data do not contain >1 sample.');
 end
 
 theta_grid = linspace(0,2*pi);
 
 switch ellipseType
     case '1STD'
-        a = sqrt(largest_eigenval); 
-        b = sqrt(smallest_eigenval);
+        a = sqrt(larger_eigenval); 
+        b = sqrt(smaller_eigenval);
     case '2STD'
-        a = 2*sqrt(largest_eigenval); 
-        b = 2*sqrt(smallest_eigenval);
+        a = 2*sqrt(larger_eigenval); 
+        b = 2*sqrt(smaller_eigenval);
     case 'SEMarea'
-        a = sqrt(largest_eigenval/sqrt(N)); % scales the ellipse's area by sqrt(N)
-        b = sqrt(smallest_eigenval/sqrt(N));
-    case {'SEMellipse' 'SEM'} % ### DEFAULT!
-        a = sqrt(largest_eigenval)/sqrt(N); % contour at stdDev/sqrt(N)
-        b = sqrt(smallest_eigenval)/sqrt(N);
+        a = sqrt(larger_eigenval/sqrt(N)); % scales the ellipse's area by sqrt(N)
+        b = sqrt(smaller_eigenval/sqrt(N));
+    case {'SEMellipse' 'SEM'} % default
+        a = sqrt(larger_eigenval)/sqrt(N); % contour at stdDev/sqrt(N)
+        b = sqrt(smaller_eigenval)/sqrt(N);
     case '95CI'
         Tsq = ((N-1)*2)/(N-2) * finv( 0.95, 2, N - 2 );
-        a = sqrt(largest_eigenval*Tsq);
-        b = sqrt(smallest_eigenval*Tsq);
+        a = sqrt(larger_eigenval*Tsq);
+        b = sqrt(smaller_eigenval*Tsq);
     otherwise
         if strcmp(ellipseType(end-1:end),'CI')
             critVal = str2double(ellipseType(1:end-2))./100;
             if critVal < 1 && critVal > 0
                 Tsq = ((N-1)*2)/(N-2) * finv( critVal, 2, N - 2 );
-                a = sqrt(largest_eigenval*Tsq);
-                b = sqrt(smallest_eigenval*Tsq);
+                a = sqrt(larger_eigenval*Tsq);
+                b = sqrt(smaller_eigenval*Tsq);
             else
                 error('CI range must be on the interval (0, 100). Please see the help!')
             end
@@ -95,8 +91,6 @@ R = [ cos(phi) sin(phi); -sin(phi) cos(phi) ];
 errorEllipse = [ellipse_x_r;ellipse_y_r]' * R;
 
 %Shift to be centered on mean coordinate
-meanXy = mean(xyData);
-meanXyAmp = norm(meanXy);
 errorEllipse = bsxfun(@plus,errorEllipse,meanXy);
 
 % find vector lengths of each point on the ellipse
@@ -125,8 +119,8 @@ if makePlot
     line([0 meanXy(1)],[0 meanXy(2)],'Color','k','LineWidth',1);    
     plot(errorEllipse(:,1), errorEllipse(:,2),'b-','LineWidth',1);   
     hold on;
-    plot([meanXy(1) sqrt(smallest_eigenval).*smallest_eigenvec(1)+meanXy(1)],[meanXy(2) sqrt(smallest_eigenval).*smallest_eigenvec(2)+meanXy(2)],'g-','LineWidth',1); 
-    plot([meanXy(1) sqrt(largest_eigenval).*largest_eigenvec(1)+meanXy(1)],[meanXy(2) sqrt(largest_eigenval).*largest_eigenvec(2)+meanXy(2)],'m-','LineWidth',1); 
+    plot([meanXy(1) sqrt(smaller_eigenval).*smaller_eigenvec(1)+meanXy(1)],[meanXy(2) sqrt(smaller_eigenval).*smaller_eigenvec(2)+meanXy(2)],'g-','LineWidth',1); 
+    plot([meanXy(1) sqrt(larger_eigenval).*larger_eigenvec(1)+meanXy(1)],[meanXy(2) sqrt(larger_eigenval).*larger_eigenvec(2)+meanXy(2)],'m-','LineWidth',1); 
     line([0 0],[min(ylim) max(ylim)],'Color','k')
     line([min(xlim) max(xlim)],[0 0],'Color','k')
     text(.9*min(xlim),.7*min(ylim),[ellipseType ' ellipse'],'FontSize',14,'Color','b');
@@ -143,10 +137,10 @@ if makePlot
     
     line([0 meanXy(1)],[0 meanXy(2)],'Color','k','LineWidth',1); % mean vector 
     
-    plot([meanXy(1) a.*largest_eigenvec(1)+meanXy(1)],[meanXy(2) a.*largest_eigenvec(2)+meanXy(2)],'m-','LineWidth',1) % half major axis (1)
-    plot([meanXy(1) -a.*largest_eigenvec(1)+meanXy(1)],[meanXy(2) -a.*largest_eigenvec(2)+meanXy(2)],'m-','LineWidth',1) % half major axis (2)
-    plot([meanXy(1) b.*smallest_eigenvec(1)+meanXy(1)],[meanXy(2) b.*smallest_eigenvec(2)+meanXy(2)],'g-','LineWidth',1) % half minor axis (1)
-    plot([meanXy(1) -b.*smallest_eigenvec(1)+meanXy(1)],[meanXy(2) -b.*smallest_eigenvec(2)+meanXy(2)],'g-','LineWidth',1) % half minor axis (2)
+    plot([meanXy(1) a.*larger_eigenvec(1)+meanXy(1)],[meanXy(2) a.*larger_eigenvec(2)+meanXy(2)],'m-','LineWidth',1) % half major axis (1)
+    plot([meanXy(1) -a.*larger_eigenvec(1)+meanXy(1)],[meanXy(2) -a.*larger_eigenvec(2)+meanXy(2)],'m-','LineWidth',1) % half major axis (2)
+    plot([meanXy(1) b.*smaller_eigenvec(1)+meanXy(1)],[meanXy(2) b.*smaller_eigenvec(2)+meanXy(2)],'g-','LineWidth',1) % half minor axis (1)
+    plot([meanXy(1) -b.*smaller_eigenvec(1)+meanXy(1)],[meanXy(2) -b.*smaller_eigenvec(2)+meanXy(2)],'g-','LineWidth',1) % half minor axis (2)
     
     text(errorEllipse(minNormIx,1),errorEllipse(minNormIx,2),sprintf('%.2f',minNorm),'FontSize',18,'Color','r')
     text(errorEllipse(maxNormIx,1),errorEllipse(maxNormIx,2),sprintf('%.2f',maxNorm),'FontSize',18,'Color','r')
