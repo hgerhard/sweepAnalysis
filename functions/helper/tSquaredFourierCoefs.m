@@ -5,6 +5,10 @@ function [results] = tSquaredFourierCoefs(xyData,testMu,alphaVal)
 % of the 2D data in xyData is the same as the mean specified in testMu at
 % the specified alphaVal (0-1).
 %
+% results contains the following fields:
+%   alpha, tSqrdCritical, tSqrd, pVal, H (0 if can't reject null; 1 if
+%       rejected the null hypothesis)
+%
 % If testMu is not provided, the mean is tested against the origin (0,0).
 % If alphaVal is not provided, it defaults to 0.05.
 %
