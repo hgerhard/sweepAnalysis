@@ -24,7 +24,7 @@ freqIxToPlot = 1;
 chanIxToPlot = 2; % channels(2) = 76;
 condsToPlot = 1:2;
 
-plotThresholdFits = false; % set to false if not desired
+plotThresholdFits = true; % set to false if not desired
 
 figNum = [];
 plotNum = nan(1,max(condsToPlot));

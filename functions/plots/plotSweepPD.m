@@ -118,10 +118,10 @@ if plotThreshFit && strcmp(plotType,'Ampl')
     clear sweepMatSubjects;
     sweepMatSubjects = constructSweepMatSubjects(pdDataMatrix,dataHdr,freqNum);
     
-    [threshVal,slopeVal,tLSB,tRSB,~,saveY,saveXX] = powerDivaScoring(sweepMatSubjects, binLevels);
+    [threshVal,threshStdErr,slopeVal,slopeStdErr,tLSB,tRSB,~,saveY,saveXX] = getThreshScoringOutput(sweepMatSubjects, binLevels);
     fitBinRange = [tLSB,tRSB];
     if isnan(threshVal)
-        fprintf('No threshold could be fitted.\n');
+        fprintf('No scoring function could be fitted.\n');
     else
         % save line info to plot after everything else so it's "on top"
         fprintf('Thresh = %1.2f, Slope = %1.2f, Range=[%d,%d].\n',threshVal,slopeVal,fitBinRange)
@@ -133,12 +133,16 @@ if plotThreshFit && strcmp(plotType,'Ampl')
         threshInfo.YY = saveY;
         threshInfo.threshVal = threshVal;
         threshInfo.slopeVal = slopeVal;
+        threshInfo.threshStdErr = threshStdErr;
+        threshInfo.slopeStdErr = slopeStdErr;
         threshInfo.fitBinRange = fitBinRange;
     else
         threshInfo.xx = nan;
         threshInfo.YY = nan;
         threshInfo.threshVal = nan;
         threshInfo.slopeVal = nan;
+        threshInfo.threshStdErr = nan;
+        threshInfo.slopeStdErr = nan;
         threshInfo.fitBinRange = nan;
     end    
 end
@@ -176,7 +180,15 @@ end
 
 % Plot linear fit used to extrapolate to the zero-crossing/threshold:
 if plotThreshFit && threshFitted    
+    
+    % add shaded error region on threshold values:
+    h = fill([threshVal-threshStdErr threshVal+threshStdErr threshVal+threshStdErr threshVal-threshStdErr],...
+        [min(ylim) min(ylim) max(ylim) max(ylim)],'k');
+    get(h)
+    set(h,'LineStyle','none','FaceAlpha',0.2,'FaceColor',dataColor);
+    
     if isLogSpaced(binLevels)
+        set(gca,'XScale','log');
         semilogx(saveXX,saveY,'k-','LineWidth',3);
         semilogx(threshVal,0,'kd','MarkerSize',18,...
             'MarkerFaceColor',dataColor,'LineWidth',3);
@@ -185,11 +197,16 @@ if plotThreshFit && threshFitted
         plot(threshVal,0,'kd','MarkerSize',18,...
             'MarkerFaceColor',dataColor,'LineWidth',3);
     end
-    text(threshVal,0.2*max(ylim),sprintf('thresh = %2.2f',threshVal),'Color',dataColor,'FontSize',12);
+    
+    text((threshVal-min(xlim))/2+min(xlim),0.3*max(ylim),sprintf('thresh (slope): %2.3f+/-%2.3f (%2.3f+/-%2.3f)',threshVal,threshStdErr,slopeVal,slopeStdErr),'Color',dataColor,'FontSize',12);
 end
 
 % Make some final plot settings:
-set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
+if plotThreshFit && threshFitted
+    set(gca,'XTick',[min(xlim) binLevels([1 floor(length(binLevels)/2) end])])
+else
+    set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
+end
 if ~hexagArrag
     xlabel('Bin Values')
     set(gca,'ticklength',1.5*get(gca,'ticklength'))

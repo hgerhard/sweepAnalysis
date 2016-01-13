@@ -45,7 +45,7 @@ end
 results.alpha = alphaVal;
 
 % Eqn. 2 in Sec. 5.3 of Anderson (1984):
-t0Sqrd = ((N-1)*2)/(N-2) * finv( 1-alphaVal, 2, N - 2 ); % 0.95 or 0.05? finv? fpdf? ###
+t0Sqrd = ((N-1)*2)/(N-2) * finv( 1-alphaVal, 2, N - 2 ); 
 results.tSqrdCritical = t0Sqrd;
 
 try
@@ -54,7 +54,7 @@ try
     tSqrd = N * (sampMu - testMu) * invSampCovMat * (sampMu - testMu)'; 
     
     tSqrdF = (N-2)/((N-1)*2) * tSqrd; 
-    pVal = 1 - fcdf(tSqrdF, 2, N-2); % ### fcdf?
+    pVal = 1 - fcdf(tSqrdF, 2, N-2);
     
     results.tSqrd = tSqrd;
     results.pVal = pVal;
