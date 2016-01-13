@@ -1,6 +1,6 @@
-function [figNum,plotNum] = plotSweepPD(plotType,pdData,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
+function [figNum,plotNum] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
 
-% [figNum,plotNum] = plotSweepPD(plotType,pdData,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
+% [figNum,plotNum] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
 %   
 % Create a plot that looks like the PowerDiva style plots, using 
 % precomputed values from PowerDiva for the means and noise estimates. The
@@ -23,10 +23,6 @@ for k = 1:length(dataHdr)
             freqIx = k;
         case 'iBin'
             binIx = k;
-        case 'Sr'
-            srIx = k;
-        case 'Si'
-            siIx = k;
         case 'Signal'
             amplIx = k;
         case 'SNR'
@@ -80,11 +76,11 @@ else
     mrkrSz = 14;
 end
 
-nBins = max(pdData(:,binIx));
+nBins = max(pdDataMatrix(:,binIx));
 
 % Get the mean trial data only (as computed by PowerDiva)
-meanTrialRows = pdData(:,trialIx) == 0 & pdData(:,binIx) ~= 0 & pdData(:,freqIx) == freqNum;
-meanTrialMat = pdData(meanTrialRows,:);
+meanTrialRows = pdDataMatrix(:,trialIx) == 0 & pdDataMatrix(:,binIx) ~= 0 & pdDataMatrix(:,freqIx) == freqNum;
+meanTrialMat = pdDataMatrix(meanTrialRows,:);
 
 switch plotType
     case 'Ampl'
@@ -92,16 +88,8 @@ switch plotType
         % Get the error estimates for confidence intervals on the means
         amplErrorRange = nan(2,nBins);
         for binNum = 1:nBins
-            crntBinRows = pdData(:,binIx)==binNum;
-            crntFreqRows = pdData(:,freqIx)==freqNum;
-            allowedRows = crntBinRows & crntFreqRows;
-            trialNums = pdData(allowedRows,trialIx);
-            allowedRows = allowedRows & pdData(:,trialIx)>0; % 0th trial is the mean trial
-            Sr = pdData(allowedRows,srIx);
-            Si = pdData(allowedRows,siIx);
-            allowedData = pdData(allowedRows,amplIx)>0; % important because samples with 0 mean are from epochs excluded by PowerDiva
-            xyData = [Sr(allowedData) Si(allowedData)];
             
+            xyData = getXyData(pdDataMatrix,dataHdr,binNum,freqNum);            
             try
                 amplErrorRange(:,binNum) = fitErrorEllipse(xyData,errType);
             catch
