@@ -1,5 +1,5 @@
 function [amplBounds,errorEllipse] = fitErrorEllipse(xyData,ellipseType,makePlot)
-%[amplBounds,errorEllipse] = fitErrorEllipse(xyData,[withinSubj],[ellipseType],[makePlot])
+%[amplBounds,errorEllipse] = fitErrorEllipse(xyData,[ellipseType],[makePlot])
 %   user provides xyData, an Nx2 matrix of 2D data of N samples
 %   opt. input ellipseType can be 'SEM' '95CI' or a string specifying
 %       a different percentage CI formated following: '%.1fCI'. Default is
