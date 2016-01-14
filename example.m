@@ -172,24 +172,30 @@ example_segPdData = makeDataStructure(dataDir, [11, 12], 'RLS', 'Example Exp', [
 
 
 %% This example shows how to use plotGroupComparison.m
+% Uncomment sections of this section as desired to test functionality
+
 % Some data that I used to test group plotting
-% dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
-dataDir1 = '/Users/Nathan/Desktop/Research/CVIdata/CVI_NT_20150407_1127/Exp_TEXT_PD1010_5_Cz';
-dataDir2 = '/Users/Nathan/Desktop/Research/CVIdata/CVI3to34_20150204_1428/Exp_TEXT_PD1010_5_Cz';
+dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
+
+% Set these data directories as desired
+% dataDir1 = '';
+% dataDir2 = '';
 
 % So that user knows what channels are in the data file
 % Typically user would not have to incorporate this code into their scripts
 % because he or she would know which channels are in the data file.
-[k1,v1] = getDefaultMap(dataDir1, 'RLS');
-[k2,v2] = getDefaultMap(dataDir2, 'RLS');
+% [k1,v1] = getDefaultMap(dataDir1, 'RLS');
+% [k2,v2] = getDefaultMap(dataDir2, 'RLS');
 
 % Creating new map with arbitrary values
-newmap = containers.Map;
-newmap('O1-Cz') = 21;
-newmap('O2-Cz') = 22;
-newmap('Oz-Cz') = 23;
-newmap('PO7-Cz') = 24;
-newmap('PO8-Cz') = 25;
+% Map will be necessary if data file has different channel naming
+% conventions
+% newmap = containers.Map;
+% newmap('O1-Cz') = 21;
+% newmap('O2-Cz') = 22;
+% newmap('Oz-Cz') = 23;
+% newmap('PO7-Cz') = 24;
+% newmap('PO8-Cz') = 25;
 
 % Here, the channels argument is [] because of the different channel naming
 % convention. Since you know the default map that getSweepDataFlex.m 
@@ -198,7 +204,10 @@ newmap('PO8-Cz') = 25;
 % below). It would probably be better to leave the channels argument as [] 
 % if you know that the data file uses a different channel naming 
 % convention, as shown in the first plotGroupComparison example below.
-plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [2,4], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
+
+% First example:
+% plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
+% Second example:
 % plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [2,4], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
 
-
+plotGroupComparison({dataDir, dataDir}, {'Group1', 'Group2'}, [71 76 70 75 83 74 82], {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}, 'RLS');
