@@ -142,4 +142,8 @@ freqsAnalyzed = freqsAnalyzed(tmpIx);
 for m = 1:length(colsToKeep)
     colHdr{m} = hdrFields{colsToKeep(m),1};
 end
+
+% close the file
+fclose(fid);
+
 end
