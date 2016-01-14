@@ -1,25 +1,18 @@
-function figNum = plotPolarBins(pdData,dataHdr,binLevels,freqNum,colorVal,figNum)
+function figNum = plotPolarBins(pdDataMatrix,dataHdr,binLevels,freqNum,colorVal,figNum)
+% figNum = plotPolarBins(pdDataMatrix,dataHdr,binLevels,freqNum,colorVal,figNum)
+%
+% Creates a multipanel plot containing one panel per bin where all of the
+% individual samples for the data are plotted in 2D with an error ellipse.
 
 for k = 1:length(dataHdr)
     switch dataHdr{k}
-        case 'iCond'
-            condIx = k;
-        case 'iTrial'
-            trialIx = k;
-        case 'iCh'
-            chanIx = k;
-        case 'iFr'
-            freqIx = k;
         case 'iBin'
             binIx = k;
-        case 'Sr'
-            srIx = k;
-        case 'Si'
-            siIx = k;
-        case 'Signal'
-            amplIx = k;
     end
 end
+
+srIx = 1;
+siIx = 2;
 
 if nargin < 5 || isempty(colorVal)
     colorVal = [0.5 0.5 0.5];
@@ -42,7 +35,7 @@ else
 end
 
 cnt = 1;
-nBins = max(pdData(:,binIx));
+nBins = max(pdDataMatrix(:,binIx));
 xlimits = nan(10,2);
 ylimits = nan(10,2);
 for binNum = 1:nBins
@@ -50,28 +43,26 @@ for binNum = 1:nBins
     subplot(2,ceil(nBins/2),cnt);    
     %set(gca,'TickDir','out');
     hold on;
-    box off;
+    box off;    
     
-    crntBinRows = pdData(:,binIx)==binNum;
-    crntFreqRows = pdData(:,freqIx)==freqNum;
-    allowedRows = crntBinRows & crntFreqRows;
-    
-    Sr = pdData(allowedRows,srIx);
-    Si = pdData(allowedRows,siIx);
-    normSrSi = pdData(allowedRows,amplIx);
-    allowedData = normSrSi>0; % important because samples with 0 mean are from epochs excluded by PowerDiva
-    Sr = Sr(allowedData);
-    Si = Si(allowedData);
-    xyData = [Sr Si];  
-    
-    errorEllipse = fitErrorEllipse(xyData);
+    xyData = getXyData(pdDataMatrix,dataHdr,binNum,freqNum);
+    Sr = xyData(:,srIx);
+    Si = xyData(:,siIx);
+    try
+        [~,errorEllipse] = fitErrorEllipse(xyData);
+    catch
+    end
     
     for k = 1:length(xyData) % which is the number of subjects if this is project data, or the number of trials if individ. subject data
         plot([0 Sr(k)],[0 Si(k)],'k-','Color',colorVal,'LineWidth',1);
         %plot(Sr(k),Si(k),'ko','MarkerFaceColor',colorVal,'MarkerEdgeColor',colorVal,'MarkerSize',6);
     end
     plot([0 mean(Sr)],[0 mean(Si)],'k-','Color',colorVal,'LineWidth',2);
-    fill(errorEllipse(:,1),errorEllipse(:,2),colorVal,'EdgeColor','none','FaceAlpha',0.5);
+    try
+        fill(errorEllipse(:,1),errorEllipse(:,2),colorVal,'EdgeColor','none','FaceAlpha',0.5);
+    catch
+        fprintf('An error ellipse could not be plotted on your data, probably your data do not contain >1 sample?');
+    end
     
     axis tight
     ylimits(cnt,:) = ylim;

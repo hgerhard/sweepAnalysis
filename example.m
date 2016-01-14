@@ -1,5 +1,6 @@
 % Sweep Analysis Example Script
 
+clearvars; clc;
 %% 1. Set parameters specifying which data to process:
 setPath;
 dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/'; % specify directory where RLS or DFT files are
@@ -23,6 +24,8 @@ freqIxToPlot = 1;
 chanIxToPlot = 1; % channels(2) = 76;
 condsToPlot = 1:2;
 
+plotThresholdFits = true; % set to false if not desired
+
 figNum = [];
 plotNum = nan(1,max(condsToPlot));
 for freqNum = freqIxToPlot
@@ -30,7 +33,7 @@ for freqNum = freqIxToPlot
         for condNum = condsToPlot
             
             [figNum,plotNum(condNum)] = plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
-                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', conditionColors(condNum,:), figNum );
+                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', plotThresholdFits, conditionColors(condNum,:), figNum );
         end
     end
 end
@@ -92,8 +95,8 @@ clf;
 for chanNum = chanIxToPlot
     for condNum = condsToPlot
         
-        plotSweepPD( 'SNR', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
-            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', conditionColors(condNum,:), [figNum,subplotLocs(chanNum,:)] );
+        plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
+            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', [], conditionColors(condNum,:), [figNum,subplotLocs(chanNum,:)] );
         set(gca,'YTick',[0 max(ylim)/4 max(ylim)/2 3*max(ylim)/4 max(ylim)])
         if condNum == condsToPlot(end)
             % add text to label channel numbers for each subplot

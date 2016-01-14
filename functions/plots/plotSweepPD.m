@@ -1,6 +1,6 @@
-function [figNum,plotNum] = plotSweepPD(plotType,pdData,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
+function [figNum,plotNum,threshInfo] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,plotThreshFit,dataColor,figHandles)
 
-% [figNum,plotNum] = plotSweepPD(plotType,pdData,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
+% [figNum,plotNum] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
 %   
 % Create a plot that looks like the PowerDiva style plots, using 
 % precomputed values from PowerDiva for the means and noise estimates. The
@@ -23,10 +23,6 @@ for k = 1:length(dataHdr)
             freqIx = k;
         case 'iBin'
             binIx = k;
-        case 'Sr'
-            srIx = k;
-        case 'Si'
-            siIx = k;
         case 'Signal'
             amplIx = k;
         case 'SNR'
@@ -45,12 +41,19 @@ if nargin < 6 || isempty(errType)
     errType = 'SEM';
 end
 
-if nargin < 7 || isempty(dataColor)
+if nargin < 7 || isempty(plotThreshFit), plotThreshFit = 0; end
+
+if plotThreshFit && ~strcmp(plotType,'Ampl')
+    fprintf('You can only plot threshold fits if the plotType is set to ''Ampl''.');
+    plotThreshFit = 0;
+end
+
+if nargin < 8 || isempty(dataColor)
     dataColor = 'k';
 end
 
 hexagArrag = false;
-if nargin < 8 || isempty(figHandles)
+if nargin < 9 || isempty(figHandles)
     figure;
     set(gcf,'Color','w');
     set(gca,'FontSize',20);
@@ -80,11 +83,16 @@ else
     mrkrSz = 14;
 end
 
-nBins = max(pdData(:,binIx));
+nBins = max(pdDataMatrix(:,binIx));
 
-% Get the mean trial data only (as computed by PowerDiva)
-meanTrialRows = pdData(:,trialIx) == 0 & pdData(:,binIx) ~= 0 & pdData(:,freqIx) == freqNum;
-meanTrialMat = pdData(meanTrialRows,:);
+threshFitted = 0;
+threshVal = nan;
+slopeVal = nan;
+fitBinRange = nan(1,2);
+
+% Get the mean trial data only (as computed by PowerDiva):
+meanTrialRows = pdDataMatrix(:,trialIx) == 0 & pdDataMatrix(:,binIx) ~= 0 & pdDataMatrix(:,freqIx) == freqNum;
+meanTrialMat = pdDataMatrix(meanTrialRows,:);
 
 switch plotType
     case 'Ampl'
@@ -92,22 +100,51 @@ switch plotType
         % Get the error estimates for confidence intervals on the means
         amplErrorRange = nan(2,nBins);
         for binNum = 1:nBins
-            crntBinRows = pdData(:,binIx)==binNum;
-            crntFreqRows = pdData(:,freqIx)==freqNum;
-            allowedRows = crntBinRows & crntFreqRows;
-            trialNums = pdData(allowedRows,trialIx);
-            allowedRows = allowedRows & pdData(:,trialIx)>0; % 0th trial is the mean trial
-            Sr = pdData(allowedRows,srIx);
-            Si = pdData(allowedRows,siIx);
-            allowedData = pdData(allowedRows,amplIx)>0; % important because samples with 0 mean are from epochs excluded by PowerDiva
-            xyData = [Sr(allowedData) Si(allowedData)];
             
-            amplErrorRange(:,binNum) = fitErrorEllipse(xyData,errType);
+            xyData = getXyData(pdDataMatrix,dataHdr,binNum,freqNum);            
+            try
+                amplErrorRange(:,binNum) = fitErrorEllipse(xyData,errType);
+            catch
+            end
         end
         if ~hexagArrag, ylabel('Amplitude (\muV)'), end
     case 'SNR'
         indexToPlot = SNRIx;
         if ~hexagArrag, ylabel('SNR'), end
+end
+
+% Compute threshold & slope (and associated variables) if desired:
+if plotThreshFit && strcmp(plotType,'Ampl')
+    clear sweepMatSubjects;
+    sweepMatSubjects = constructSweepMatSubjects(pdDataMatrix,dataHdr,freqNum);
+    
+    [threshVal,threshStdErr,slopeVal,slopeStdErr,tLSB,tRSB,~,saveY,saveXX] = getThreshScoringOutput(sweepMatSubjects, binLevels);
+    fitBinRange = [tLSB,tRSB];
+    if isnan(threshVal)
+        fprintf('No scoring function could be fitted.\n');
+    else
+        % save line info to plot after everything else so it's "on top"
+        fprintf('Thresh = %1.2f, Slope = %1.2f, Range=[%d,%d].\n',threshVal,slopeVal,fitBinRange)
+        threshFitted = 1;
+    end
+    
+    if threshFitted
+        threshInfo.xx = saveXX;
+        threshInfo.YY = saveY;
+        threshInfo.threshVal = threshVal;
+        threshInfo.slopeVal = slopeVal;
+        threshInfo.threshStdErr = threshStdErr;
+        threshInfo.slopeStdErr = slopeStdErr;
+        threshInfo.fitBinRange = fitBinRange;
+    else
+        threshInfo.xx = nan;
+        threshInfo.YY = nan;
+        threshInfo.threshVal = nan;
+        threshInfo.slopeVal = nan;
+        threshInfo.threshStdErr = nan;
+        threshInfo.slopeStdErr = nan;
+        threshInfo.fitBinRange = nan;
+    end    
 end
 
 
@@ -128,15 +165,47 @@ else
     end
 end
 
+% Plot error bars if appropriate:
 if strcmp(plotType,'Ampl')
-    % Plot error bars on the means (don't use built-in Matlab errorbar
-    % function because it makes ugly "tees," the horizontal lines, sometimes)
+    % don't use built-in Matlab errorbar unction because it makes ugly 
+    % "tees," the horizontal lines on top & bottom
     for binNum = 1:nBins
-        plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
+        try
+            plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
+        catch            
+            fprintf('Error bars could not be plotted on your data, probably your data do not contain >1 sample.');
+        end
     end
 end
 
-set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
+% Plot linear fit used to extrapolate to the zero-crossing/threshold:
+if plotThreshFit && threshFitted    
+    
+    % add shaded error region on threshold values:
+    h = fill([threshVal-threshStdErr threshVal+threshStdErr threshVal+threshStdErr threshVal-threshStdErr],...
+        [min(ylim) min(ylim) max(ylim) max(ylim)],'k');
+    set(h,'LineStyle','none','FaceAlpha',0.2,'FaceColor',dataColor);
+    
+    if isLogSpaced(binLevels)
+        set(gca,'XScale','log');
+        semilogx(saveXX,saveY,'k-','LineWidth',3);
+        semilogx(threshVal,0,'kd','MarkerSize',18,...
+            'MarkerFaceColor',dataColor,'LineWidth',3);
+    else
+        plot(saveXX,saveY,'k-','LineWidth',3);
+        plot(threshVal,0,'kd','MarkerSize',18,...
+            'MarkerFaceColor',dataColor,'LineWidth',3);
+    end
+    
+    text((threshVal-min(xlim))/2+min(xlim),0.3*max(ylim),sprintf('thresh (slope): %2.3f+/-%2.3f (%2.3f+/-%2.3f)',threshVal,threshStdErr,slopeVal,slopeStdErr),'Color',dataColor,'FontSize',12);
+end
+
+% Make some final plot settings:
+if plotThreshFit && threshFitted
+    set(gca,'XTick',[min(xlim) binLevels([1 floor(length(binLevels)/2) end])])
+else
+    set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
+end
 if ~hexagArrag
     xlabel('Bin Values')
     set(gca,'ticklength',1.5*get(gca,'ticklength'))
