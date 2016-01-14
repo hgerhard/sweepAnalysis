@@ -8,9 +8,10 @@ function [figNum,plotNum,threshInfo] = plotSweepPD(plotType,pdDataMatrix,dataHdr
 % the desired type of error estimation process specified in errType
 % (default 'SEM') for the plotType 'Ampl'
 %
-% plotTypes: 'Ampl' (amplitude in muV) or 'SNR' for Snr (no errorbars)
-% plotOpt: structure holding options for plots (e.g., colors). Fields and defaults are
-%       plotOpt.dataColor = 'k';
+% INPUTS:
+%       plotTypes: 'Ampl' (amplitude in muV) or 'SNR' for Snr (no errorbars)
+%       plotOpt: structure holding options for plots (e.g., colors). Fields and defaults are
+%           plotOpt.dataColor = 'k';
 %
 % This function is only meant to be called once for a particular sweep. The
 % logic is that you create a figure and then call this function each time
@@ -51,7 +52,7 @@ if plotThreshFit && ~strcmp(plotType,'Ampl')
     plotThreshFit = 0;
 end
 
-% set all plot options to default if non specified
+% set all plot options to default if none specified
 if nargin < 8 || isempty(plotOpt)
     plotOpt.dataColor = 'k';
 end
@@ -191,7 +192,7 @@ if plotThreshFit && threshFitted
     % add shaded error region on threshold values:
     h = fill([threshVal-threshStdErr threshVal+threshStdErr threshVal+threshStdErr threshVal-threshStdErr],...
         [min(ylim) min(ylim) max(ylim) max(ylim)],'k');
-    set(h,'LineStyle','none','FaceAlpha',0.2,'FaceColor',dataColor);
+    set(h,'LineStyle','none','FaceAlpha',0.2,'FaceColor',plotOpt.dataColor);
     
     if isLogSpaced(binLevels)
         set(gca,'XScale','log');
@@ -203,12 +204,11 @@ if plotThreshFit && threshFitted
         plot(threshVal,0,'kd','MarkerSize',18,...
             'MarkerFaceColor',plotOpt.dataColor,'LineWidth',3);
     end
-<<<<<<< HEAD
-    text(threshVal,0.2*max(ylim),sprintf('thresh = %2.2f',threshVal),'Color',plotOpt.dataColor,'FontSize',12);
-=======
-    
-    text((threshVal-min(xlim))/2+min(xlim),0.3*max(ylim),sprintf('thresh (slope): %2.3f+/-%2.3f (%2.3f+/-%2.3f)',threshVal,threshStdErr,slopeVal,slopeStdErr),'Color',dataColor,'FontSize',12);
->>>>>>> upstream/master
+
+    text((threshVal-min(xlim))/2+min(xlim),0.3*max(ylim),...
+        sprintf('thresh (slope): %2.3f+/-%2.3f (%2.3f+/-%2.3f)',threshVal,...
+        threshStdErr,slopeVal,slopeStdErr),'Color',plotOpt.dataColor,'FontSize',12);
+
 end
 
 % Make some final plot settings:
