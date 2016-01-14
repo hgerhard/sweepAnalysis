@@ -97,6 +97,7 @@ for k=1:nConds
                 channels(n) = oldToNewMap(channels(n));
             end
         else
+            assert(isempty(channels));
             channels = cell2mat(values(newChanMap));
         end
     end
