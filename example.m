@@ -188,8 +188,14 @@ newmap('Oz-Cz') = 23;
 newmap('PO7-Cz') = 24;
 newmap('PO8-Cz') = 25;
 
-% Just using same data directory for the groups, but obviously, it can be
-% different data directories.
-plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [21 22 23 24 25], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
+% Here, the channels argument is [] because of the different channel naming
+% convention. Since you know the default map that getSweepDataFlex.m 
+% returns, you can filter channels based on the default values of the map 
+% (i.e. 1, 2, 3, etc.) (shown in the second plotGroupComparison example 
+% below). It would probably be better to leave the channels argument as [] 
+% if you know that the data file uses a different channel naming 
+% convention, as shown in the first plotGroupComparison example below.
+plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [2,4], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
+% plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [2,4], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
 
 
