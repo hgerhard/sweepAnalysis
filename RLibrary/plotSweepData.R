@@ -6,13 +6,13 @@ plotSweepData <- function(data, colHdr, freqs, trialNum)
 	phaseIdx <- grep("Phase", colHdr);
 	sweepValIdx <- grep("SweepVal", colHdr);
 	noiseIdx <- grep("Noise", colHdr);
-	maxFreq <- length(freqs);
+	numFreqs <- length(freqs);
 	
 	cat("Signal Index:", signalIdx, "\n");
 	cat("Phase Index:", phaseIdx, "\n");
-	cat("Max Freq:", maxFreq, "\n");
+	cat("Total Number of Freq:", numFreqs, "\n");
 	
-	numPerTrial <- maxFreq * 11;
+	numPerTrial <- numFreqs * 11;
 	startingIdx <- numPerTrial * trialNum + 1;
 	
 	cat("Starting Index:", startingIdx+1, "\n");
