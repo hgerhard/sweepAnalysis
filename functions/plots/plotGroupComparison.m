@@ -1,4 +1,4 @@
-function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstType)
+function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstType, newChanMap)
 % plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstType)
 %
 % dataDirs       : Cell array of group data file directories
@@ -9,15 +9,20 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
 % condDesc       : Cell array of condition description. Must be consistent
 %                  with the array of condition numbers.
 % [sweepEstType] : 'RLS' or 'DFT'. If not specified, default is 'RLS'
+% [newChanMap]   : Map that maps channel names to numbers
 %
 % This function assumes you only want to plot one channel, one frequency,
 % one condition per group.
 
-    if nargin < 6
+    if (nargin < 5) || (isempty(sweepEstType))
         sweepEstType = 'RLS';
         fprintf('No data type specified. Default (RLS) is assumed.\n');
     end
 
+    if (nargin < 6) || (isempty(newChanMap))
+        newChanMap = containers.Map;
+    end
+    
     % Get number of groups we are comparing
     numToCompare = length(dataDirs);
 
@@ -42,7 +47,7 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
         fprintf('Plotting for group: %s\n', groupNames{i});
         
         % Get pd data
-        currPdData = makeDataStructure(dataDirs{i}, channels, sweepEstType, groupNames{i}, condDesc);
+        currPdData = makeDataStructure(dataDirs{i}, channels, sweepEstType, groupNames{i}, condDesc, newChanMap);
         
         % Get channel to compare
         fprintf('Select channel:\n');
