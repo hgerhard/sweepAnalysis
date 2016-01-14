@@ -144,6 +144,6 @@ for m = 1:length(colsToKeep)
 end
 
 % close the file
-fclose(datafile);
+fclose(fid);
 
 end
