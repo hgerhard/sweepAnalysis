@@ -21,7 +21,7 @@ subdirectories:
 
 - exampleData/tACS_withResponseExports/ (a PowerDiva Host export of one tACS subject’s data with both RLS & RTSeg_*.mat files which contain the responses on each trial — useful for testing appendSegToData.m)
 
-- RLibrary/ (#NATHAN please add description here)
+- RLibrary/ (This directory will be populated with functions written in R so that the lab has a dataflow pipeline completely coded in R. This will allow users to perform some statistical tests on the data using certain packages that may be readily available in R but not readily available in MATLAB.)
 
 
 key functions:

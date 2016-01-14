@@ -1,5 +1,5 @@
 function [amplBounds,errorEllipse] = fitErrorEllipse(xyData,ellipseType,makePlot)
-%[amplBounds,errorEllipse] = fitErrorEllipse(xyData,[withinSubj],[ellipseType],[makePlot])
+%[amplBounds,errorEllipse] = fitErrorEllipse(xyData,[ellipseType],[makePlot])
 %   user provides xyData, an Nx2 matrix of 2D data of N samples
 %   opt. input ellipseType can be 'SEM' '95CI' or a string specifying
 %       a different percentage CI formated following: '%.1fCI'. Default is
@@ -17,7 +17,16 @@ function [amplBounds,errorEllipse] = fitErrorEllipse(xyData,ellipseType,makePlot
 %   direction. An ellipse is then fit to this data, at a distance from the
 %   mean datapoint depending on the type of ellipseType specified.
 %
-%   Dependency: eigFourierCoefs.m which is also in functions/helper/
+%   Calculations for the error ellipses based on alpha-specified confidence
+%   regions (e.g. 95%CI or 68%CI) are calculated following information from
+%   Chapter 5 of Johnson & Wickern (2007) Applied Multivariate Statistical
+%   Analysis, Pearson Prentice Hall.
+%
+%   DEPENDENCY: eigFourierCoefs.m which is part of the GitHub repository
+%   sweepAnalysis/ in functions/helper/
+% 
+%   To download this repository go to:
+%   https://github.com/hgerhard/sweepAnalysis
 
 xyData = double(xyData); 
 
@@ -62,15 +71,16 @@ switch ellipseType
         a = sqrt(larger_eigenval)/sqrt(N); % contour at stdDev/sqrt(N)
         b = sqrt(smaller_eigenval)/sqrt(N);
     case '95CI'
-        % t0_sqrd is from Eqn. 2 in Sec. 5.3 of Anderson (1984)
-        t0_sqrd = ((N-1)*2)/(N-2) * finv( 0.95, 2, N - 2 ); % 0.95 or 0.05? finv? fpdf? ###
+        % following Eqn. 5-19 of Johnson & Wichern (2007):
+        t0_sqrd = ( (N-1)*2 ) / ( N*(N-2) ) * finv( 0.95, 2, N - 2 ); 
         a = sqrt(larger_eigenval*t0_sqrd);
         b = sqrt(smaller_eigenval*t0_sqrd);
     otherwise
         if strcmp(ellipseType(end-1:end),'CI')
             critVal = str2double(ellipseType(1:end-2))./100;
-            if critVal < 1 && critVal > 0
-                t0_sqrd = ((N-1)*2)/(N-2) * finv( critVal, 2, N - 2 ); % 0.95 or 0.05? finv? fpdf? ###
+            if critVal < 1 && critVal > 0                
+                % following Eqn. 5-19 of Johnson & Wichern (2007):
+                t0_sqrd = ( (N-1)*2 )/( N*(N-2) ) * finv( critVal, 2, N - 2 ); 
                 a = sqrt(larger_eigenval*t0_sqrd);
                 b = sqrt(smaller_eigenval*t0_sqrd);
             else
