@@ -128,6 +128,20 @@ for chanNum = chanIxToPlot
 end
 
 
+%% This example shows how to use changeChanNames.m properly
+dataDir = 'exampleData/tACS_withResponseExports';
+
+% Just so the user knows the default keys and values provided by
+% getSweepDataFlex.m, when creating a new map
+[k,v] = getDefaultMap(dataDir, 'RLS');
+
+% Create new map with sample numbers
+newmap = containers.Map;
+newmap('O1-Cz') = 11;
+newmap('O2-Cz') = 12;
+chanNameMapPDData = makeDataStructure(dataDir, [11,12], 'RLS', 'Channel Name Map Exp', [], newmap);
+
+
 %% This example shows how to use appendSegToData.m
 % Using example data that has the segFile data
 fprintf('Reading data...\n');
@@ -135,18 +149,47 @@ fprintf('Reading data...\n');
 fprintf('Appending seg info...\n');
 [newColHdr, newData] = appendSegToData(cols, data, 'exampleData/tACS_withResponseExports/RTSeg_s002.mat');
 
-% Or, you can read in the data using makeDataStructure and then change the
-% data matrix of the data
-% dataDir = 'exampleData/tACS_withResponseExports';
-% example_segPdData = makeDataStructure(dataDir, [1], 'RLS', 'Example Exp', {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
-% [example_segPdData.hdrFields, example_segPdData.dataMatrix] = appendSegToData(example_segPdData.hdrFields, example_segPdData.dataMatrix, ...
-%                                                                               'exampleData/tACS_withResponseExports/RTSeg_s002.mat');
+% Or, you can read in the data using makeDataStructure.m and then change
+% the data matrix of the data
+dataDir = 'exampleData/tACS_withResponseExports';
+
+% Create new map with sample numbers
+newmap = containers.Map;
+newmap('O1-Cz') = 11;
+newmap('O2-Cz') = 12;
+
+example_segPdData = makeDataStructure(dataDir, [11, 12], 'RLS', 'Example Exp', [], newmap);
+
+% Let's say we want to look at channel 'O1-Cz' (or 11) and condition 1
+% (This would be (1,1) in the PD data structure). Of course, this will be
+% different if we want to look at channel 'O2-Cz' and a different condition
+[example_segPdData(1,1).hdrFields, example_segPdData(1,1).dataMatrix] = appendSegToData(example_segPdData(1,1).hdrFields, ...
+                                                                                        example_segPdData(1,1).dataMatrix, ...
+                                                                                        'exampleData/tACS_withResponseExports/RTSeg_s002.mat');
+
 
 %% This example shows how to use plotGroupComparison.m
-dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
+% Some data that I used to test group plotting
+% dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
+dataDir1 = '/Users/Nathan/Desktop/Research/CVIdata/CVI_NT_20150407_1127/Exp_TEXT_PD1010_5_Cz';
+dataDir2 = '/Users/Nathan/Desktop/Research/CVIdata/CVI3to34_20150204_1428/Exp_TEXT_PD1010_5_Cz';
+
+% So that user knows what channels are in the data file
+% Typically user would not have to incorporate this code into their scripts
+% because he or she would know which channels are in the data file.
+[k1,v1] = getDefaultMap(dataDir1, 'RLS');
+[k2,v2] = getDefaultMap(dataDir2, 'RLS');
+
+% Creating new map with arbitrary values
+newmap = containers.Map;
+newmap('O1-Cz') = 21;
+newmap('O2-Cz') = 22;
+newmap('Oz-Cz') = 23;
+newmap('PO7-Cz') = 24;
+newmap('PO8-Cz') = 25;
 
 % Just using same data directory for the groups, but obviously, it can be
 % different data directories.
-plotGroupComparison({dataDir, dataDir}, {'Name1', 'Name2'}, [71 76 70 75 83 74 82], {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}, 'RLS');
+plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [21 22 23 24 25], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
 
 
