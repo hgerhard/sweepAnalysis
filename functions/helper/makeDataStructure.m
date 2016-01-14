@@ -74,6 +74,7 @@ if (nargin<6) || (isempty(newChanMap))
     newChanMap = containers.Map;
 end
 
+oldChannels = channels;
 pdData = struct([]);
 for k=1:nConds
     fileCrntCond = fileList(k).name;
@@ -90,8 +91,14 @@ for k=1:nConds
     % If not 0, means that data file channels are not of the form hc%d and
     % do the channel number conversion.
     if oldChanMap.Count ~= 0
-        channels = cell2mat(values(newChanMap));
-        dataMatrix = changeChanNames(hdrFields, dataMatrix, oldChanMap, newChanMap);
+        [dataMatrix, oldToNewMap] = changeChanNames(hdrFields, dataMatrix, oldChanMap, newChanMap);
+        if ~isempty(channels)
+            for n = 1:length(channels)
+                channels(n) = oldToNewMap(channels(n));
+            end
+        else
+            channels = cell2mat(values(newChanMap));
+        end
     end
     
     channelColumn = strcmp(hdrFields,'iCh'); 
@@ -117,5 +124,6 @@ for k=1:nConds
         end
         fprintf('Done.\n');
     end
+    channels = oldChannels;
 end
 
