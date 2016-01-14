@@ -165,9 +165,9 @@ else
     end
 end
 
-% Plot error bars if appropriate:
+% Plot error bars on amplitude values if appropriate:
 if strcmp(plotType,'Ampl')
-    % don't use built-in Matlab errorbar unction because it makes ugly 
+    % don't use built-in Matlab errorbar function because it makes ugly 
     % "tees," the horizontal lines on top & bottom
     for binNum = 1:nBins
         try
