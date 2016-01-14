@@ -1,4 +1,4 @@
-function [newData] = changeChanNames(colHdr, data, oldMap, newMap)
+function [newData, oldToNewMap] = changeChanNames(colHdr, data, oldMap, newMap)
     % This function is a standalone function that is used along with
     % getSweepDataFlex.m.  getSweepDataFlex.m also returns a map with
     % channel name keys and double values.  This function allows the user
