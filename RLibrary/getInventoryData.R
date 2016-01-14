@@ -1,11 +1,18 @@
 getInventoryData <- function(datafile)
 {
-	# NAs mean missing data, it is different from "N/A" in the inventory data
-	
 	require(xlsx);
-	allData <- read.xlsx(datafile, sheetName = "CVI", stringsAsFactors = FALSE, header = TRUE);
+	allData <- read.xlsx(datafile, sheetName = "CVI", stringsAsFactors = TRUE, header = TRUE);
 	colHeaders = colnames(allData);
 	questionHeaders = c(colHeaders[7:59]);
+
+	# Convert scores to numbers and translate N/A to empty for now.
+	for (i in 1:length(questionHeaders))
+	{
+		currQuestion = questionHeaders[i];
+		allData[[currQuestion]][tolower(allData[[currQuestion]]) == "n/a"] <- "";
+		allData[[currQuestion]] <- as.numeric(allData[[currQuestion]]);
+	}
+	qData <- allData[, 7:59];
 
 	# 7:59 is hard coded question indices in the data file
 	averageScorePerSubject = c();
@@ -33,17 +40,17 @@ getInventoryData <- function(datafile)
 	allData$minScores <- minScorePerSubject;
 	allData$medianScores <- medianScorePerSubject;
 
-	for (question in 1:length(questionHeaders))
-	{
-		currQuestion = questionHeaders[question];
-		cat("Question", currQuestion, "\n");
-		# Hard coded 6 here, since questions start at index 7
-		currData = allData[question+6];
-		cat("\n")
-		cat(summary(currData));
-		cat("\n\n");
-	}
+	# Print some summary statistics like 1st quartile, median, mean...
+	# for (question in 1:length(questionHeaders))
+	# {
+		# currQuestion = questionHeaders[question];
+		# cat("Question", currQuestion, "\n");
+		# currData = allData[[currQuestion]];
+		# cat("\n")
+		# cat(summary(currData));
+		# cat("\n\n");
+	# }	
 
-	returnVals <- list("allData" = allData, "questionHeaders" = questionHeaders);
+	returnVals <- list("allData" = allData, "questionHeaders" = questionHeaders, "qData" = qData);
 	return(returnVals);
 }
