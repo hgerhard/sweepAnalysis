@@ -102,9 +102,11 @@ for k=1:nConds
             for n = 1:length(channels)
                 channels(n) = oldToNewMap(channels(n));
             end
+            nChan = length(channels);
         else
             assert(isempty(channels));
             channels = cell2mat(values(newChanMap));
+            nChan = length(channels);
         end
     end
     
