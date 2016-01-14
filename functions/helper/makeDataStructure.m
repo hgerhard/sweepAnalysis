@@ -85,18 +85,11 @@ for k=1:nConds
     end
     fprintf('Loading data in %s (%d/%d)...',fileCrntCond,k,nConds);
     
-    % This will make sure that dataMatrix will not be empty when filtering
-    % the channels. Right now, the code does not do any filtering of
-    % channels in the data file for 'iCh' values of the form hc%d.
-    if newChanMap.Count ~= 0
-        channels = [];
-    end
-    
     [hdrFields, freqsIncl, binLevels, dataMatrix, oldChanMap] = getSweepDataFlex(fullPathToFile, channels);
     
     % If not 0, means that data file channels are not of the form hc%d and
     % do the channel number conversion.
-    if oldChanMap.Count ~= 0 && newChanMap.Count ~= 0
+    if oldChanMap.Count ~= 0
         channels = cell2mat(values(newChanMap));
         dataMatrix = changeChanNames(hdrFields, dataMatrix, oldChanMap, newChanMap);
     end
