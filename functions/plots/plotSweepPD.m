@@ -1,6 +1,6 @@
-function [figNum,plotNum,threshInfo] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,plotThreshFit,dataColor,figHandles)
+function [figNum,plotNum,threshInfo] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,plotThreshFit,plotOpt,figHandles)
 
-% [figNum,plotNum] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,dataColor,figHandles)
+% function [figNum,plotNum,threshInfo] = plotSweepPD(plotType,pdDataMatrix,dataHdr,binLevels,freqNum,errType,plotThreshFit,plotOpt,figHandles)
 %   
 % Create a plot that looks like the PowerDiva style plots, using 
 % precomputed values from PowerDiva for the means and noise estimates. The
@@ -9,11 +9,14 @@ function [figNum,plotNum,threshInfo] = plotSweepPD(plotType,pdDataMatrix,dataHdr
 % (default 'SEM') for the plotType 'Ampl'
 %
 % plotTypes: 'Ampl' (amplitude in muV) or 'SNR' for Snr (no errorbars)
+% plotOpt: structure holding options for plots (e.g., colors). Fields and defaults are
+%       plotOpt.dataColor = 'k';
 %
 % This function is only meant to be called once for a particular sweep. The
 % logic is that you create a figure and then call this function each time
 % you want to plot another sweep (i.e. from a different group or a
 % different condition)
+
 
 for k = 1:length(dataHdr)
     switch dataHdr{k}
@@ -48,9 +51,13 @@ if plotThreshFit && ~strcmp(plotType,'Ampl')
     plotThreshFit = 0;
 end
 
-if nargin < 8 || isempty(dataColor)
-    dataColor = 'k';
+% set all plot options to default if non specified
+if nargin < 8 || isempty(plotOpt)
+    plotOpt.dataColor = 'k';
 end
+
+% set any missing plot options to default
+if ~isfield(plotOpt,'dataColor'); plotOpt.dataColor='k'; end
 
 hexagArrag = false;
 if nargin < 9 || isempty(figHandles)
@@ -148,16 +155,16 @@ figure(figNum);
 % Plot mean data (filled circles):
 if isLogSpaced(binLevels)
     hold on;
-    plotNum = semilogx(binLevels,meanTrialMat(:,indexToPlot),'ko-','Color',dataColor,'MarkerFaceColor',dataColor,'LineWidth',2);   
+    plotNum = semilogx(binLevels,meanTrialMat(:,indexToPlot),'ko-','Color',plotOpt.dataColor,'MarkerFaceColor',plotOpt.dataColor,'LineWidth',2);   
     if strcmp(plotType,'Ampl')
         % with noise estimates (empty squares)
-        semilogx(binLevels,meanTrialMat(:,noiseIx),'ks','Color',dataColor,'MarkerSize',mrkrSz);
+        semilogx(binLevels,meanTrialMat(:,noiseIx),'ks','Color',plotOpt.dataColor,'MarkerSize',mrkrSz);
     end
 else
     hold on;
-    plotNum = plot(binLevels,meanTrialMat(:,indexToPlot),'ko-','Color',dataColor,'MarkerFaceColor',dataColor,'LineWidth',2);
+    plotNum = plot(binLevels,meanTrialMat(:,indexToPlot),'ko-','Color',plotOpt.dataColor,'MarkerFaceColor',plotOpt.dataColor,'LineWidth',2);
     if strcmp(plotType,'Ampl')
-        plot(binLevels,meanTrialMat(:,noiseIx),'ks','Color',dataColor,'MarkerSize',mrkrSz);
+        plot(binLevels,meanTrialMat(:,noiseIx),'ks','Color',plotOpt.dataColor,'MarkerSize',mrkrSz);
     end
 end
 
@@ -167,7 +174,7 @@ if strcmp(plotType,'Ampl')
     % "tees," the horizontal lines on top & bottom
     for binNum = 1:nBins
         try
-            plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',dataColor,'LineWidth',2);
+            plot([binLevels(binNum) binLevels(binNum)],[amplErrorRange(1,binNum) amplErrorRange(2,binNum)],'k-','Color',plotOpt.dataColor,'LineWidth',2);
         catch            
             fprintf('Error bars could not be plotted on your data, probably your data do not contain >1 sample.');
         end
@@ -179,13 +186,13 @@ if plotThreshFit && threshFitted
     if isLogSpaced(binLevels)
         semilogx(saveXX,saveY,'k-','LineWidth',3);
         semilogx(threshVal,0,'kd','MarkerSize',18,...
-            'MarkerFaceColor',dataColor,'LineWidth',3);
+            'MarkerFaceColor',plotOpt.dataColor,'LineWidth',3);
     else
         plot(saveXX,saveY,'k-','LineWidth',3);
         plot(threshVal,0,'kd','MarkerSize',18,...
-            'MarkerFaceColor',dataColor,'LineWidth',3);
+            'MarkerFaceColor',plotOpt.dataColor,'LineWidth',3);
     end
-    text(threshVal,0.2*max(ylim),sprintf('thresh = %2.2f',threshVal),'Color',dataColor,'FontSize',12);
+    text(threshVal,0.2*max(ylim),sprintf('thresh = %2.2f',threshVal),'Color',plotOpt.dataColor,'FontSize',12);
 end
 
 % Make some final plot settings:
