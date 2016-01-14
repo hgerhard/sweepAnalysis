@@ -89,7 +89,13 @@ for k=1:nConds
     [hdrFields, freqsIncl, binLevels, dataMatrix, oldChanMap] = getSweepDataFlex(fullPathToFile, channels);
     
     % If not 0, means that data file channels are not of the form hc%d and
-    % do the channel number conversion.
+    % do the channel number conversion. If 'channels' is not an empty list,
+    % meaning that the user specified some channels to filter based on the
+    % default channel mapping in getSweepDataFlex.m (i.e. 1,2,3,...) (see 
+    % example.m), then must update the channel names to those provided by 
+    % the user in the new channel naming map (so that it is reflected in 
+    % the pd data structure). Otherwise, if 'channels' is empty, just use 
+    % all the channels in the data file as default.
     if oldChanMap.Count ~= 0
         [dataMatrix, oldToNewMap] = changeChanNames(hdrFields, dataMatrix, oldChanMap, newChanMap);
         if ~isempty(channels)
@@ -125,6 +131,7 @@ for k=1:nConds
         end
         fprintf('Done.\n');
     end
+    % Reset channel vector for the next data file
     channels = oldChannels;
 end
 
