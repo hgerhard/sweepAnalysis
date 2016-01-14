@@ -50,12 +50,11 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
         % Get pd data
         currPdData = makeDataStructure(dataDirs{i}, channels, sweepEstType, groupNames{i}, condDesc, newChanMap);
         
-        % Get channel to compare
-        if isempty(channels)
-            for n = 1:size(currPdData, 2)
-                % Can do this because channels same for all structs in pd data.
-                channels = [channels currPdData(1,n).channel];
-            end
+        % Get channels to compare
+        channels = [];
+        for n = 1:size(currPdData, 2)
+            % Can do this because channels same for all structs in pd data.
+            channels = [channels currPdData(1,n).channel];
         end
         fprintf('Select channel:\n');
         selectedChan = userQuery(channels);
