@@ -43,6 +43,7 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
     colors = [1 0 0; 0 0 1; 0 1 0; 1 0 1; 0 1 1; 0 0 0];
     figNum = [];
     plotNum = nan(1, numToCompare);
+    plotThresholdFits = true; % set to false if not desired
     for i = 1:numToCompare
         fprintf('Plotting for group: %s\n', groupNames{i});
         
@@ -91,7 +92,7 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
         [figNum, plotNum(i)] = plotSweepPD(selectedPlot, currPdData(selectedCond, selectedChan).dataMatrix, ...
                                                          currPdData(selectedCond, selectedChan).hdrFields,  ...
                                                          currPdData(selectedCond, selectedChan).binLevels,  ...
-                                                         selectedFreq, 'SEM', colors(i,:), figNum );
+                                                         selectedFreq, 'SEM', plotThresholdFits, colors(i,:), figNum );
     end
     legend(plotNum(~isnan(plotNum)), groupNames,'Location','NorthWest')
 end
