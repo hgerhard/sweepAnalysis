@@ -44,6 +44,7 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
     figNum = [];
     plotNum = nan(1, numToCompare);
     plotThresholdFits = true; % set to false if not desired
+    oldChannels = channels;
     for i = 1:numToCompare
         fprintf('Plotting for group: %s\n', groupNames{i});
         
@@ -98,6 +99,9 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
                                                          currPdData(selectedCond, selectedChan).hdrFields,  ...
                                                          currPdData(selectedCond, selectedChan).binLevels,  ...
                                                          selectedFreq, 'SEM', plotThresholdFits, colors(i,:), figNum );
+
+        % Reset channels because they get modified each loop
+        channels = oldChannels;
     end
     legend(plotNum(~isnan(plotNum)), groupNames,'Location','NorthWest')
 end
