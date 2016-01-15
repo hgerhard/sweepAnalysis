@@ -22,7 +22,7 @@ srIx = 1;
 siIx = 2;
 
 sampMu = mean(xyData);
-sampCovMat = cov([xyData(:,srIx),xyData(:,siIx)]);
+sampCovMat = nancov([xyData(:,srIx),xyData(:,siIx)]);
 [eigenvec, eigenval] = eig(sampCovMat);
 
 % sort the eigenvectors by their eigenvalues
