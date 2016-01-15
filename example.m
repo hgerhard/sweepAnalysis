@@ -32,12 +32,8 @@ for freqNum = freqIxToPlot
     for chanNum = chanIxToPlot
         for condNum = condsToPlot
             
-            plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
-            
             [figNum,plotNum(condNum)] = plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
-                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', plotThresholdFits, plotOpt, figNum );
-            
-            clearvars plotOpt
+                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', plotThresholdFits, conditionColors(condNum,:), figNum );
         end
     end
 end
@@ -59,13 +55,7 @@ for freqNum = freqIxToPlot
     for chanNum = chanIxToPlot        
         for condNum = condsToPlot
             
-            plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
-
-            figNum = plotPolarBins(pdData(condNum,chanNum).dataMatrix,...
-                pdData(condNum,chanNum).hdrFields,pdData(condNum,chanNum).binLevels,...
-                freqNum,plotOpt,figNum);
-            
-            clearvars plotOpt
+            figNum = plotPolarBins(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,pdData(condNum,chanNum).binLevels,freqNum,conditionColors(condNum,:),figNum);
 
         end
     end
@@ -84,13 +74,7 @@ figNum = [];
 for freqNum = freqIxToPlot
     for chanNum = chanIxToPlot        
         for condNum = condsToPlot
-            
-            plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
-
-            plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,...
-                pdData(condNum,chanNum).hdrFields,freqNum,plotOpt,figNum);
-            
-            clearvars plotOpt
+            plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,freqNum,conditionColors(condNum,:),figNum);
         end
     end
 end
@@ -110,16 +94,10 @@ figure(figNum);
 clf;
 for chanNum = chanIxToPlot
     for condNum = condsToPlot
-       
-        plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
-
         
         plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
-            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', [], plotOpt, [figNum,subplotLocs(chanNum,:)] );
+            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', [], conditionColors(condNum,:), [figNum,subplotLocs(chanNum,:)] );
         set(gca,'YTick',[0 max(ylim)/4 max(ylim)/2 3*max(ylim)/4 max(ylim)])
-        
-        clearvars plotOpt
-        
         if condNum == condsToPlot(end)
             % add text to label channel numbers for each subplot
             text(1.2*pdData(condNum,chanNum).binLevels(1),max(ylim)-(max(ylim)/10),sprintf('%d',channels(chanNum)),'FontSize',14)
@@ -143,13 +121,7 @@ clf;
 for chanNum = chanIxToPlot
     for condNum = condsToPlot
         
-        plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
-        
-        plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,...
-            freqNum,plotOpt,[figNum,subplotLocs(chanNum,:)]);
-        
-        clearvars plotOpt
-        
+        plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,freqNum,conditionColors(condNum,:),[figNum,subplotLocs(chanNum,:)]);
         if condNum == condsToPlot(end)
             % add text to label channel numbers for each subplot
             text(1.2*pdData(condNum,chanNum).binLevels(1),max(ylim)-(max(ylim)/10),sprintf('%d',channels(chanNum)),'FontSize',14)
@@ -170,7 +142,7 @@ dataDir = 'exampleData/tACS_withResponseExports';
 newmap = containers.Map;
 newmap('O1-Cz') = 11;
 newmap('O2-Cz') = 12;
-chanNameMapPDData = makeDataStructure(dataDir, [11,12], 'RLS', 'Channel Name Map Exp', [], newmap);
+chanNameMapPDData = makeDataStructure(dataDir, [1,2], 'RLS', 'Channel Name Map Exp', [], newmap);
 
 
 %% This example shows how to use appendSegToData.m
@@ -189,7 +161,7 @@ newmap = containers.Map;
 newmap('O1-Cz') = 11;
 newmap('O2-Cz') = 12;
 
-example_segPdData = makeDataStructure(dataDir, [11, 12], 'RLS', 'Example Exp', [], newmap);
+example_segPdData = makeDataStructure(dataDir, [1, 2], 'RLS', 'Example Exp', [], newmap);
 
 % Let's say we want to look at channel 'O1-Cz' (or 11) and condition 1
 % (This would be (1,1) in the PD data structure). Of course, this will be
