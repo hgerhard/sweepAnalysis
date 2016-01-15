@@ -32,8 +32,12 @@ for freqNum = freqIxToPlot
     for chanNum = chanIxToPlot
         for condNum = condsToPlot
             
+            plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
+            
             [figNum,plotNum(condNum)] = plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
-                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', plotThresholdFits, conditionColors(condNum,:), figNum );
+                pdData(condNum,chanNum).binLevels, freqNum, 'SEM', plotThresholdFits, plotOpt, figNum );
+            
+            clearvars plotOpt
         end
     end
 end
@@ -55,7 +59,13 @@ for freqNum = freqIxToPlot
     for chanNum = chanIxToPlot        
         for condNum = condsToPlot
             
-            figNum = plotPolarBins(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,pdData(condNum,chanNum).binLevels,freqNum,conditionColors(condNum,:),figNum);
+            plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
+
+            figNum = plotPolarBins(pdData(condNum,chanNum).dataMatrix,...
+                pdData(condNum,chanNum).hdrFields,pdData(condNum,chanNum).binLevels,...
+                freqNum,plotOpt,figNum);
+            
+            clearvars plotOpt
 
         end
     end
@@ -74,7 +84,13 @@ figNum = [];
 for freqNum = freqIxToPlot
     for chanNum = chanIxToPlot        
         for condNum = condsToPlot
-            plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,freqNum,conditionColors(condNum,:),figNum);
+            
+            plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
+
+            plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,...
+                pdData(condNum,chanNum).hdrFields,freqNum,plotOpt,figNum);
+            
+            clearvars plotOpt
         end
     end
 end
@@ -94,10 +110,16 @@ figure(figNum);
 clf;
 for chanNum = chanIxToPlot
     for condNum = condsToPlot
+       
+        plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
+
         
         plotSweepPD( 'Ampl', pdData(condNum,chanNum).dataMatrix, pdData(condNum,chanNum).hdrFields, ...
-            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', [], conditionColors(condNum,:), [figNum,subplotLocs(chanNum,:)] );
+            pdData(condNum,chanNum).binLevels, freqNum, 'SEM', [], plotOpt, [figNum,subplotLocs(chanNum,:)] );
         set(gca,'YTick',[0 max(ylim)/4 max(ylim)/2 3*max(ylim)/4 max(ylim)])
+        
+        clearvars plotOpt
+        
         if condNum == condsToPlot(end)
             % add text to label channel numbers for each subplot
             text(1.2*pdData(condNum,chanNum).binLevels(1),max(ylim)-(max(ylim)/10),sprintf('%d',channels(chanNum)),'FontSize',14)
@@ -121,7 +143,13 @@ clf;
 for chanNum = chanIxToPlot
     for condNum = condsToPlot
         
-        plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,freqNum,conditionColors(condNum,:),[figNum,subplotLocs(chanNum,:)]);
+        plotOpt.dataColor=conditionColors(condNum,:); % set plot options (color)
+        
+        plotNumberAcceptedTrials(pdData(condNum,chanNum).dataMatrix,pdData(condNum,chanNum).hdrFields,...
+            freqNum,plotOpt,[figNum,subplotLocs(chanNum,:)]);
+        
+        clearvars plotOpt
+        
         if condNum == condsToPlot(end)
             % add text to label channel numbers for each subplot
             text(1.2*pdData(condNum,chanNum).binLevels(1),max(ylim)-(max(ylim)/10),sprintf('%d',channels(chanNum)),'FontSize',14)

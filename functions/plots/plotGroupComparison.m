@@ -25,20 +25,6 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
     
     % Get number of groups we are comparing
     numToCompare = length(dataDirs);
-
-%     % Rows are groups, columns are file names for each data file in the
-%     % data directory
-%     dataFileInfoStruct = struct([]);
-%     for i = 1:numToCompare
-%         fileList = dir(sprintf('%s/%s*.txt', dataDirs{i}, sweepEstType));
-%         numFiles = length(fileList);
-%         dataFileInfoStruct(i).groupName = groupNames{i};
-%         dataFileInfoStruct(i).dataDirectory = dataDirs{i};
-%         dataFileInfoStruct(i).filenames = cell(1, numFiles);
-%         for j = 1:numFiles
-%             dataFileInfoStruct(i).filenames{j} = fileList(j).name; %#ok<*AGROW>
-%         end
-%     end
     
     colors = [1 0 0; 0 0 1; 0 1 0; 1 0 1; 0 1 1; 0 0 0];
     figNum = [];
@@ -95,11 +81,11 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
         
         % We are plotting each group (no longer each condition, like in the
         % example.m code)
+        plotOpt.dataColor=colors(i,:); % set plot options
         [figNum, plotNum(i)] = plotSweepPD(selectedPlot, currPdData(selectedCond, selectedChan).dataMatrix, ...
                                                          currPdData(selectedCond, selectedChan).hdrFields,  ...
                                                          currPdData(selectedCond, selectedChan).binLevels,  ...
-                                                         selectedFreq, 'SEM', plotThresholdFits, colors(i,:), figNum );
-
+                                                         selectedFreq, 'SEM', plotThresholdFits, colors(i,:), plotOpt, figNum );
         % Reset channels because they get modified each loop
         channels = oldChannels;
     end
