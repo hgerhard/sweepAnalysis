@@ -25,25 +25,12 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
     
     % Get number of groups we are comparing
     numToCompare = length(dataDirs);
-
-%     % Rows are groups, columns are file names for each data file in the
-%     % data directory
-%     dataFileInfoStruct = struct([]);
-%     for i = 1:numToCompare
-%         fileList = dir(sprintf('%s/%s*.txt', dataDirs{i}, sweepEstType));
-%         numFiles = length(fileList);
-%         dataFileInfoStruct(i).groupName = groupNames{i};
-%         dataFileInfoStruct(i).dataDirectory = dataDirs{i};
-%         dataFileInfoStruct(i).filenames = cell(1, numFiles);
-%         for j = 1:numFiles
-%             dataFileInfoStruct(i).filenames{j} = fileList(j).name; %#ok<*AGROW>
-%         end
-%     end
     
     colors = [1 0 0; 0 0 1; 0 1 0; 1 0 1; 0 1 1; 0 0 0];
     figNum = [];
     plotNum = nan(1, numToCompare);
     plotThresholdFits = true; % set to false if not desired
+    oldChannels = channels;
     for i = 1:numToCompare
         fprintf('Plotting for group: %s\n', groupNames{i});
         
@@ -99,6 +86,8 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
                                                          currPdData(selectedCond, selectedChan).hdrFields,  ...
                                                          currPdData(selectedCond, selectedChan).binLevels,  ...
                                                          selectedFreq, 'SEM', plotThresholdFits, plotOpt, figNum );
+        % Reset channels because they get modified each loop
+        channels = oldChannels;
     end
     legend(plotNum(~isnan(plotNum)), groupNames,'Location','NorthWest')
 end

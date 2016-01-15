@@ -1,9 +1,13 @@
-function [xyData] = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,dataType)
+function [xyData, allowedData] = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,dataType)
 % [xyData] = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,[dataType])
 %
 % Return a [N x 2] matrix of Fourier coefficients with the real coefs in the
 % first column and the imaginary coefs in the second column. N = number of
 % samples.
+%
+% allowedData is an array of logicals indicating which samples have
+% amplitude > 0 and which samples have amplitude = 0 (meaning it was
+% removed)
 %
 % dataType can be:
 %   'signal' (default) - will return Fourier coefficients for the signal
@@ -64,9 +68,15 @@ allowedRows     = allowedRows & pdDataMatrix(:,trialIx)>0; % 0th trial is the me
 realVals        = pdDataMatrix(allowedRows,ix1);
 imagVals        = pdDataMatrix(allowedRows,ix2);
 
-allowedData     = pdDataMatrix(allowedRows,amplIx)>0; % important because samples with 0 amplitude are epochs excluded by PowerDiva
+zeroRows        = pdDataMatrix(allowedRows,amplIx) == 0;
 
-xyData          = [realVals(allowedData) imagVals(allowedData)];
+realVals(zeroRows) = NaN;
+imagVals(zeroRows) = NaN;
+
+allowedData     = pdDataMatrix(allowedRows,amplIx) > 0; % important because samples with 0 amplitude are epochs excluded by PowerDiva
+
+% xyData          = [realVals(allowedData) imagVals(allowedData)];
+xyData          = [realVals imagVals];
 
 if isempty(xyData)
     fprintf('xyData is still empty. Probably you did not export the trial data');

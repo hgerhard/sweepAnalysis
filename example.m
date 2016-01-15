@@ -206,8 +206,8 @@ example_segPdData = makeDataStructure(dataDir, [11, 12], 'RLS', 'Example Exp', [
 dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
 
 % Set these data directories as desired
-% dataDir1 = '';
-% dataDir2 = '';
+dataDir1 = '';
+dataDir2 = '';
 
 % So that user knows what channels are in the data file
 % Typically user would not have to incorporate this code into their scripts
@@ -218,12 +218,12 @@ dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
 % Creating new map with arbitrary values
 % Map will be necessary if data file has different channel naming
 % conventions
-% newmap = containers.Map;
-% newmap('O1-Cz') = 21;
-% newmap('O2-Cz') = 22;
-% newmap('Oz-Cz') = 23;
-% newmap('PO7-Cz') = 24;
-% newmap('PO8-Cz') = 25;
+newmap = containers.Map;
+newmap('O1-Cz') = 21;
+newmap('O2-Cz') = 22;
+newmap('Oz-Cz') = 23;
+newmap('PO7-Cz') = 24;
+newmap('PO8-Cz') = 25;
 
 % Here, the channels argument is [] because of the different channel naming
 % convention. Since you know the default map that getSweepDataFlex.m 
@@ -236,6 +236,6 @@ dataDir = 'exampleData/PowerDivaProProject_Exp_TEXT_HCN_128_Avg/';
 % First example:
 % plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
 % Second example:
-% plotGroupComparison({dataDir1, dataDir2}, {'CVI_NT', 'CVI'}, [2,4], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
+plotGroupComparison({dataDir2, dataDir1}, {'CVI', 'CVI_NT'}, [2,4], {'Cond1', 'Cond2', 'Cond3', 'Cond4', 'Cond5'}, 'RLS', newmap);
 
-plotGroupComparison({dataDir, dataDir}, {'Group1', 'Group2'}, [71 76 70 75 83 74 82], {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}, 'RLS');
+% plotGroupComparison({dataDir, dataDir}, {'Group1', 'Group2'}, [71 76 70 75 83 74 82], {'HorSwp' 'VerSwp' 'HorCorr' 'VerCorr'}, 'RLS');
