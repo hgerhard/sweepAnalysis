@@ -201,11 +201,7 @@ if plotThreshFit && threshFitted
 end
 
 % Make some final plot settings:
-if plotThreshFit && threshFitted
-    set(gca,'XTick',[min(xlim) binLevels([1 floor(length(binLevels)/2) end])])
-else
-    set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
-end
+set(gca,'XTick',binLevels([1 floor(length(binLevels)/2) end]))
 if ~hexagArrag
     xlabel('Bin Values')
     set(gca,'ticklength',1.5*get(gca,'ticklength'))
