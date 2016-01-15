@@ -1,10 +1,14 @@
-function [figNum] = plotNumberAcceptedTrials(pdData,dataHdr,freqNum,dataColor,figHandles)
-% [figNum] = plotNumberAcceptedTrials(pdData,dataHdr,freqNum,dataColor,figHandles)
+function [figNum] = plotNumberAcceptedTrials(pdData,dataHdr,freqNum,plotOpt,figHandles)
+% [figNum] = plotNumberAcceptedTrials(pdData,dataHdr,freqNum,plotOpt,figHandles)
 %
 % Creates a bar plot indicating the number of accepted trials for each bin
 % and the total number of trials run for each bin. Accepted trials are
 % bars with colored edges whereas total numbers of trials are gray/black
 % edged bars.
+%
+% INPUTS:
+%       plotOpt: structure holding options for plots (e.g., colors). Fields and defaults are
+%           plotOpt.dataColor = 'k';
 
 for k = 1:length(dataHdr)
     switch dataHdr{k}
@@ -19,9 +23,13 @@ for k = 1:length(dataHdr)
     end
 end
 
-if nargin < 4 || isempty(dataColor)
-    dataColor = 'k';
+% set all plot options to default if none specified
+if nargin < 4 || isempty(plotOpt)
+    plotOpt.dataColor = 'k';
 end
+
+% set any missing plot options to default
+if ~isfield(plotOpt,'dataColor'); plotOpt.dataColor='k'; end
 
 hexagArrag = false;
 if nargin < 5 || isempty(figHandles)
@@ -67,7 +75,7 @@ set(h,'FaceColor',[0.9 0.9 0.9],'EdgeColor',[0.9 0.9 0.9],'LineWidth',1.5);
 hold on;
 h = bar(Ntrials);
 set(h,'FaceColor','w')
-set(h,'EdgeColor',dataColor,'LineWidth',1.5);
+set(h,'EdgeColor',plotOpt.dataColor,'LineWidth',1.5);
 ylim([0 max(totTrials)])
 xlim([0 nBins+1])
 box off

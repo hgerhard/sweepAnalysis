@@ -94,10 +94,11 @@ function plotGroupComparison(dataDirs, groupNames, channels, condDesc, sweepEstT
         
         % We are plotting each group (no longer each condition, like in the
         % example.m code)
+        plotOpt.dataColor=colors(i,:); % set plot options
         [figNum, plotNum(i)] = plotSweepPD(selectedPlot, currPdData(selectedCond, selectedChan).dataMatrix, ...
                                                          currPdData(selectedCond, selectedChan).hdrFields,  ...
                                                          currPdData(selectedCond, selectedChan).binLevels,  ...
-                                                         selectedFreq, 'SEM', plotThresholdFits, colors(i,:), figNum );
+                                                         selectedFreq, 'SEM', plotThresholdFits, plotOpt, figNum );
     end
     legend(plotNum(~isnan(plotNum)), groupNames,'Location','NorthWest')
 end
