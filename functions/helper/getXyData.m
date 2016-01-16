@@ -69,7 +69,7 @@ realVals        = pdDataMatrix(allowedRows,ix1);
 imagVals        = pdDataMatrix(allowedRows,ix2);
 
 allowedData     = pdDataMatrix(allowedRows,amplIx) > 0; % important because samples with 0 amplitude are epochs excluded by PowerDiva
-
+                                                        % >0 because negative amplitudes would also indicate something is wrong
 realVals(~allowedData) = NaN;
 imagVals(~allowedData) = NaN;
 
