@@ -68,18 +68,23 @@ allowedRows     = allowedRows & pdDataMatrix(:,trialIx)>0; % 0th trial is the me
 realVals        = pdDataMatrix(allowedRows,ix1);
 imagVals        = pdDataMatrix(allowedRows,ix2);
 
-zeroRows        = pdDataMatrix(allowedRows,amplIx) == 0;
-
-realVals(zeroRows) = NaN;
-imagVals(zeroRows) = NaN;
-
 allowedData     = pdDataMatrix(allowedRows,amplIx) > 0; % important because samples with 0 amplitude are epochs excluded by PowerDiva
 
-% xyData          = [realVals(allowedData) imagVals(allowedData)];
+realVals(~allowedData) = NaN;
+imagVals(~allowedData) = NaN;
+
 xyData          = [realVals imagVals];
 
 if isempty(xyData)
     fprintf('xyData is still empty. Probably you did not export the trial data');
 end
-    
+
+zeroAmplSubj = find(allowedData == 0);
+if ~isempty(zeroAmplSubj)
+    fprintf('%s, Bin %d, Freq %d, Omitted subjects/''trials'': ', dataType, binNum, freqNum);
+    for i = 1:length(zeroAmplSubj)
+        fprintf('%d ', zeroAmplSubj(i));
+    end
+    fprintf('\n');
+end
             
