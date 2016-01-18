@@ -19,43 +19,19 @@ function [sweepMatSubjects] = constructSweepMatSubjects(pdDataMatrix,dataHdr,fre
 
     % first get the Sr, Si values:
     for binNum = 1:nBins
-        [xyData, allowed] = getXyData(pdDataMatrix,dataHdr,binNum,freqNum);
-        zeroAmplSubj = find(allowed == 0);
-        if ~isempty(zeroAmplSubj)
-            fprintf('Signal; Bin %d; Omitted subjects: ', binNum);
-            for i = 1:length(zeroAmplSubj)
-                fprintf('%d, ', zeroAmplSubj(i));
-            end
-            fprintf('\n');
-        end
+        xyData = getXyData(pdDataMatrix,dataHdr,binNum,freqNum);   
         sweepMatSubjects(binNum,1:2,:) = reshape(xyData',[1 2 nSamples]); % transpose is critical!
     end
 
     % now get the N1r, N1i values:
     for binNum = 1:nBins
-        [xyData, allowed] = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,'N1');
-        zeroAmplSubj = find(allowed == 0);
-        if ~isempty(zeroAmplSubj)
-            fprintf('N1; Bin %d; Omitted subjects: ', binNum);
-            for i = 1:length(zeroAmplSubj)
-                fprintf('%d, ', zeroAmplSubj(i));
-            end
-            fprintf('\n');
-        end
+        xyData = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,'N1');
         sweepMatSubjects(binNum,3:4,:) = reshape(xyData',[1 2 nSamples]); % transpose is critical!
     end
 
     % now get the N2r, N2i values:
     for binNum = 1:nBins
-        [xyData, allowed] = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,'N2');
-        zeroAmplSubj = find(allowed == 0);
-        if ~isempty(zeroAmplSubj)
-            fprintf('N2; Bin %d; Omitted subjects: ', binNum);
-            for i = 1:length(zeroAmplSubj)
-                fprintf('%d, ', zeroAmplSubj(i));
-            end
-            fprintf('\n');
-        end        
+        xyData = getXyData(pdDataMatrix,dataHdr,binNum,freqNum,'N2');      
         sweepMatSubjects(binNum,5:6,:) = reshape(xyData',[1 2 nSamples]); % transpose is critical!
     end
 end
