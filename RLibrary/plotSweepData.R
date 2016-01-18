@@ -1,5 +1,7 @@
 plotSweepData <- function(data, colHdr, freqs, trialNum)
 {
+	# Which trial I want to plot
+	
 	cat("Data dim:", dim(data), "\n");
 	
 	signalIdx <- grep("Signal", colHdr);
@@ -15,8 +17,6 @@ plotSweepData <- function(data, colHdr, freqs, trialNum)
 	numPerTrial <- numFreqs * 11;
 	startingIdx <- numPerTrial * trialNum + 1;
 	
-	cat("Starting Index:", startingIdx+1, "\n");
-	cat("Final Index:", startingIdx+10, "\n");
 	cat("data", data[(startingIdx+1):(startingIdx+10), signalIdx], "\n");
 	cat("noise", data[(startingIdx+1):(startingIdx+10), noiseIdx], "\n");
 	
