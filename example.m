@@ -170,7 +170,7 @@ dataDir = 'exampleData/tACS_withResponseExports';
 newmap = containers.Map;
 newmap('O1-Cz') = 11;
 newmap('O2-Cz') = 12;
-chanNameMapPDData = makeDataStructure(dataDir, [11,12], 'RLS', 'Channel Name Map Exp', [], newmap);
+chanNameMapPDData = makeDataStructure(dataDir, [1,2], 'RLS', 'Channel Name Map Exp', [], newmap);
 
 
 %% This example shows how to use appendSegToData.m
@@ -189,7 +189,7 @@ newmap = containers.Map;
 newmap('O1-Cz') = 11;
 newmap('O2-Cz') = 12;
 
-example_segPdData = makeDataStructure(dataDir, [11, 12], 'RLS', 'Example Exp', [], newmap);
+example_segPdData = makeDataStructure(dataDir, [1, 2], 'RLS', 'Example Exp', [], newmap);
 
 % Let's say we want to look at channel 'O1-Cz' (or 11) and condition 1
 % (This would be (1,1) in the PD data structure). Of course, this will be
